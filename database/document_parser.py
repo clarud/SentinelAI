@@ -136,7 +136,7 @@ class DocumentParser:
     
     def _detect_scam_label_columns(self, df: pd.DataFrame) -> Dict[str, Any]:
         """
-        Detect columns that contain scam labels (0/1 values)
+        Detect columns that contain scam labels with flexible value formats
         
         Args:
             df: Pandas DataFrame to analyze
@@ -146,13 +146,33 @@ class DocumentParser:
         """
         # Possible column names that might contain scam labels
         scam_column_names = ['class', 'label', 'target', 'scam', 'fraud', 'is_scam', 
-                            'is_fraud', 'spam', 'malicious', 'phishing', 'classification']
+                            'is_fraud', 'spam', 'malicious', 'phishing', 'classification',
+                            'fraudulent', 'type', 'category', 'status', 'result']
+        
+        # Define mappings for different label formats
+        scam_mappings = {
+            # Binary numeric
+            '1': 'scam', '1.0': 'scam', 1: 'scam', 1.0: 'scam',
+            '0': 'not_scam', '0.0': 'not_scam', 0: 'not_scam', 0.0: 'not_scam',
+            
+            # Text labels (case insensitive)
+            'scam': 'scam', 'fraud': 'scam', 'fraudulent': 'scam', 'malicious': 'scam',
+            'spam': 'scam', 'phishing': 'scam', 'fake': 'scam', 'bad': 'scam',
+            'suspicious': 'scam', 'positive': 'scam', 'yes': 'scam', 'true': 'scam',
+            
+            'not_scam': 'not_scam', 'legitimate': 'not_scam', 'legit': 'not_scam',
+            'real': 'not_scam', 'good': 'not_scam', 'safe': 'not_scam', 'ham': 'not_scam',
+            'normal': 'not_scam', 'clean': 'not_scam', 'negative': 'not_scam',
+            'no': 'not_scam', 'false': 'not_scam', 'valid': 'not_scam'
+        }
         
         scam_info = {
             'has_scam_labels': False,
             'scam_columns': [],
             'labels': [],
-            'scam_distribution': {}
+            'scam_distribution': {},
+            'detected_format': None,
+            'original_values': []
         }
         
         for col in df.columns:
@@ -161,41 +181,73 @@ class DocumentParser:
             # Check if column name suggests it's a label column
             is_potential_label_col = any(name in col_lower for name in scam_column_names)
             
-            # Check if column contains only 0s and 1s (or mostly 0s and 1s)
-            unique_values = df[col].dropna().unique()
-            contains_binary = all(str(val).strip() in ['0', '1', '0.0', '1.0'] for val in unique_values)
-            
-            if is_potential_label_col and contains_binary:
-                scam_info['has_scam_labels'] = True
-                scam_info['scam_columns'].append(col)
+            if is_potential_label_col:
+                # Get unique values in the column
+                unique_values = df[col].dropna().unique()
                 
-                # Convert labels to readable format
-                labels = []
-                for _, row in df.iterrows():
-                    value = str(row[col]).strip()
-                    if value in ['1', '1.0']:
-                        labels.append('scam')
-                    elif value in ['0', '0.0']:
-                        labels.append('not_scam')
+                # Convert to strings for consistent processing
+                unique_str_values = [str(val).strip().lower() for val in unique_values]
+                
+                # Check if we can map most/all unique values
+                mappable_count = 0
+                for val in unique_str_values:
+                    if val in scam_mappings:
+                        mappable_count += 1
+                
+                # If we can map at least 80% of unique values, consider it a label column
+                mapping_ratio = mappable_count / len(unique_str_values) if unique_str_values else 0
+                
+                if mapping_ratio >= 0.8:
+                    scam_info['has_scam_labels'] = True
+                    scam_info['scam_columns'].append(col)
+                    
+                    # Convert labels to readable format
+                    labels = []
+                    original_values = []
+                    
+                    for _, row in df.iterrows():
+                        original_value = row[col]
+                        original_values.append(original_value)
+                        
+                        # Handle NaN/None values
+                        if pd.isna(original_value):
+                            labels.append('unknown')
+                            continue
+                        
+                        value_str = str(original_value).strip().lower()
+                        
+                        if value_str in scam_mappings:
+                            labels.append(scam_mappings[value_str])
+                        else:
+                            labels.append('unknown')
+                    
+                    scam_info['labels'] = labels
+                    scam_info['original_values'] = original_values
+                    
+                    # Determine the detected format
+                    if all(str(val).strip() in ['0', '1', '0.0', '1.0'] for val in unique_values):
+                        scam_info['detected_format'] = 'binary_numeric'
+                    elif all(isinstance(val, (int, float)) for val in unique_values):
+                        scam_info['detected_format'] = 'numeric'
                     else:
-                        labels.append('unknown')
-                
-                scam_info['labels'] = labels
-                
-                # Calculate distribution
-                scam_count = labels.count('scam')
-                not_scam_count = labels.count('not_scam')
-                unknown_count = labels.count('unknown')
-                
-                scam_info['scam_distribution'] = {
-                    'scam': scam_count,
-                    'not_scam': not_scam_count,
-                    'unknown': unknown_count,
-                    'total': len(labels)
-                }
-                
-                logger.info(f"Detected scam label column '{col}': {scam_count} scam, {not_scam_count} not_scam")
-                break  # Use the first matching column
+                        scam_info['detected_format'] = 'text'
+                    
+                    # Calculate distribution
+                    scam_count = labels.count('scam')
+                    not_scam_count = labels.count('not_scam')
+                    unknown_count = labels.count('unknown')
+                    
+                    scam_info['scam_distribution'] = {
+                        'scam': scam_count,
+                        'not_scam': not_scam_count,
+                        'unknown': unknown_count,
+                        'total': len(labels)
+                    }
+                    
+                    logger.info(f"Detected scam label column '{col}' (format: {scam_info['detected_format']}): "
+                               f"{scam_count} scam, {not_scam_count} not_scam, {unknown_count} unknown")
+                    logger.info(f"Original unique values: {list(unique_values)}")
+                    break  # Use the first matching column
         
         return scam_info
     
