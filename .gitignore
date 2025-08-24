@@ -61,3 +61,4 @@ dump.rdb
 
 # --- Others ---
 database/documents/*
+sentinel-ai/
