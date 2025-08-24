@@ -58,3 +58,7 @@ apps/**/.env*
 *.db
 *.pid
 dump.rdb
+
+# --- Others ---
+database/documents/*
+sentinel-ai/
