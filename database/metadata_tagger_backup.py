@@ -9,14 +9,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class MetadataTagger:
-    """Handles metadata tagging for fraud detection documents - Version 2
-    
-    This version sets all documents to 'unknown' risk level since the actual
-    risk assessment will be performed by the main agent using MCP server tools.
-    """
+    """Handles metadata tagging for fraud detection documents"""
     
     def __init__(self):
-        # Keep risk keywords for potential future use or reference
         self.risk_keywords = {
             'high_risk': [
                 'urgent payment', 'wire transfer', 'bitcoin', 'cryptocurrency',
@@ -74,21 +69,97 @@ class MetadataTagger:
         # Default fallback
         return 'unknown'
     
-    def set_default_risk_assessment(self) -> Dict[str, Any]:
-        """Set default risk assessment for documents before main agent processing"""
+    def calculate_risk_level(self, 
+                           content: str, 
+                           entities: Dict[str, List[str]], 
+                           suspicious_patterns: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculate risk level and probability based on content analysis"""
+        
+        content_lower = content.lower()
+        risk_score = 0.0
+        risk_factors = []
+        
+        # Check for high-risk keywords (weight: 3.0 each)
+        for keyword in self.risk_keywords['high_risk']:
+            if keyword in content_lower:
+                risk_score += 3.0
+                risk_factors.append(f"High-risk keyword: {keyword}")
+        
+        # Check for medium-risk keywords (weight: 1.5 each)
+        for keyword in self.risk_keywords['medium_risk']:
+            if keyword in content_lower:
+                risk_score += 1.5
+                risk_factors.append(f"Medium-risk keyword: {keyword}")
+        
+        # Check for low-risk keywords (weight: -0.5 each, reduces risk)
+        for keyword in self.risk_keywords['low_risk']:
+            if keyword in content_lower:
+                risk_score -= 0.5
+                risk_factors.append(f"Low-risk keyword: {keyword}")
+        
+        # Analyze suspicious patterns
+        if suspicious_patterns.get('urgency_words'):
+            risk_score += len(suspicious_patterns['urgency_words']) * 0.5
+            risk_factors.append(f"Urgency indicators: {len(suspicious_patterns['urgency_words'])}")
+        
+        if suspicious_patterns.get('financial_terms'):
+            risk_score += len(suspicious_patterns['financial_terms']) * 0.3
+            risk_factors.append(f"Financial terms: {len(suspicious_patterns['financial_terms'])}")
+        
+        if suspicious_patterns.get('suspicious_phrases'):
+            risk_score += len(suspicious_patterns['suspicious_phrases']) * 2.0
+            risk_factors.append(f"Suspicious phrases: {len(suspicious_patterns['suspicious_phrases'])}")
+        
+        if suspicious_patterns.get('excessive_caps'):
+            risk_score += 1.0
+            risk_factors.append("Excessive capitalization")
+        
+        if suspicious_patterns.get('excessive_punctuation'):
+            risk_score += 0.5
+            risk_factors.append("Excessive punctuation")
+        
+        # Analyze entities for risk indicators
+        if entities.get('emails'):
+            # Multiple email addresses might indicate forwarded scams
+            if len(entities['emails']) > 3:
+                risk_score += 1.0
+                risk_factors.append(f"Multiple email addresses: {len(entities['emails'])}")
+        
+        if entities.get('urls'):
+            # Multiple URLs might indicate phishing
+            if len(entities['urls']) > 2:
+                risk_score += 1.5
+                risk_factors.append(f"Multiple URLs: {len(entities['urls'])}")
+            
+            # Check for suspicious domains
+            suspicious_domains = ['bit.ly', 'tinyurl', 'goo.gl', 't.co']
+            for url in entities['urls']:
+                if any(domain in url.lower() for domain in suspicious_domains):
+                    risk_score += 2.0
+                    risk_factors.append(f"Suspicious URL shortener: {url}")
+        
+        # Convert score to probability (0-1)
+        # Using sigmoid-like function to map score to probability
+        max_score = 20.0  # Theoretical maximum score
+        probability = min(max(risk_score / max_score, 0.0), 1.0)
+        
+        # Determine risk category
+        if probability >= 0.7:
+            risk_level = "scam"
+        elif probability >= 0.3:
+            risk_level = "unknown"
+        else:
+            risk_level = "not_scam"
+        
         return {
-            'risk_level': 'unknown',
-            'scam_probability': None,  # Will be set by main agent
-            'risk_score': None,       # Will be calculated by main agent
-            'risk_factors': []        # Will be populated by main agent
+            'risk_level': risk_level,
+            'scam_probability': round(probability, 3),
+            'risk_score': round(risk_score, 2),
+            'risk_factors': risk_factors
         }
     
     def create_metadata(self, chunked_doc: Dict[str, Any]) -> Dict[str, Any]:
-        """Create comprehensive metadata for the document and its chunks
-        
-        All documents are initially tagged as 'unknown' risk level since
-        the actual risk assessment will be performed by the main agent.
-        """
+        """Create comprehensive metadata for the document and its chunks"""
         
         original_doc = chunked_doc.get('original_document', {})
         file_info = original_doc.get('file_info', {})
@@ -101,8 +172,9 @@ class MetadataTagger:
         # Get document name
         document_name = file_info.get('filename', 'unknown_document')
         
-        # Set default risk assessment (unknown until main agent processes)
-        document_risk = self.set_default_risk_assessment()
+        # Calculate risk for the full document
+        full_content = original_doc.get('cleaned_content', '')
+        document_risk = self.calculate_risk_level(full_content, entities, suspicious_patterns)
         
         # Create base metadata that applies to the entire document
         base_metadata = {
@@ -121,18 +193,18 @@ class MetadataTagger:
                 'emails': len(entities.get('emails', [])),
                 'phone_numbers': len(entities.get('phone_numbers', [])),
                 'urls': len(entities.get('urls', []))
-            },
-            # Store raw analysis data for future use by main agent
-            'raw_entities': entities,
-            'raw_suspicious_patterns': suspicious_patterns,
-            'requires_risk_assessment': True  # Flag indicating this needs main agent processing
+            }
         }
         
         # Create metadata for each chunk
         chunks_with_metadata = []
         for chunk in chunked_doc.get('chunks', []):
-            # Set default risk assessment for chunks as well
-            chunk_risk = self.set_default_risk_assessment()
+            # Calculate risk for individual chunk
+            chunk_risk = self.calculate_risk_level(
+                chunk['text'], 
+                entities,  # Use document-level entities for context
+                suspicious_patterns
+            )
             
             chunk_metadata = {
                 **base_metadata,  # Include all base metadata
@@ -157,67 +229,18 @@ class MetadataTagger:
             'chunks_with_metadata': chunks_with_metadata,
             'processing_summary': {
                 'total_chunks': len(chunks_with_metadata),
-                'high_risk_chunks': 0,    # Will be updated after main agent processing
-                'medium_risk_chunks': 0,  # Will be updated after main agent processing
-                'low_risk_chunks': 0,     # Will be updated after main agent processing
-                'unknown_risk_chunks': len(chunks_with_metadata)  # All chunks start as unknown
+                'high_risk_chunks': len([c for c in chunks_with_metadata 
+                                       if c['metadata']['chunk_risk_level'] == 'scam']),
+                'medium_risk_chunks': len([c for c in chunks_with_metadata 
+                                         if c['metadata']['chunk_risk_level'] == 'unknown']),
+                'low_risk_chunks': len([c for c in chunks_with_metadata 
+                                      if c['metadata']['chunk_risk_level'] == 'not_scam'])
             }
         }
         
-        logger.info(f"Created initial metadata for document '{document_name}': "
+        logger.info(f"Created metadata for document '{document_name}': "
                    f"{result['processing_summary']['total_chunks']} chunks, "
                    f"risk level: {base_metadata['risk_level']} "
-                   f"(awaiting main agent risk assessment)")
+                   f"(probability: {base_metadata['scam_probability']})")
         
         return result
-    
-    def update_risk_assessment(self, 
-                             metadata: Dict[str, Any], 
-                             risk_level: str, 
-                             scam_probability: Optional[float] = None,
-                             risk_score: Optional[float] = None,
-                             risk_factors: Optional[List[str]] = None) -> Dict[str, Any]:
-        """Update risk assessment after main agent processing
-        
-        This method will be used to update the metadata after the main agent
-        has determined the actual risk level and scam probability.
-        """
-        
-        # Update document-level risk assessment
-        metadata['document_metadata']['risk_level'] = risk_level
-        metadata['document_metadata']['scam_probability'] = scam_probability
-        metadata['document_metadata']['document_risk_score'] = risk_score
-        metadata['document_metadata']['document_risk_factors'] = risk_factors or []
-        metadata['document_metadata']['requires_risk_assessment'] = False
-        metadata['document_metadata']['risk_assessment_timestamp'] = datetime.now().isoformat()
-        
-        # Update chunk-level risk assessment (assuming same risk level for all chunks)
-        for chunk in metadata['chunks_with_metadata']:
-            chunk['metadata']['chunk_risk_level'] = risk_level
-            chunk['metadata']['chunk_scam_probability'] = scam_probability
-            chunk['metadata']['chunk_risk_score'] = risk_score
-            chunk['metadata']['chunk_risk_factors'] = risk_factors or []
-        
-        # Update processing summary
-        total_chunks = len(metadata['chunks_with_metadata'])
-        if risk_level == 'scam':
-            metadata['processing_summary']['high_risk_chunks'] = total_chunks
-            metadata['processing_summary']['medium_risk_chunks'] = 0
-            metadata['processing_summary']['low_risk_chunks'] = 0
-        elif risk_level == 'not_scam':
-            metadata['processing_summary']['high_risk_chunks'] = 0
-            metadata['processing_summary']['medium_risk_chunks'] = 0
-            metadata['processing_summary']['low_risk_chunks'] = total_chunks
-        else:  # unknown
-            metadata['processing_summary']['high_risk_chunks'] = 0
-            metadata['processing_summary']['medium_risk_chunks'] = total_chunks
-            metadata['processing_summary']['low_risk_chunks'] = 0
-        
-        metadata['processing_summary']['unknown_risk_chunks'] = 0
-        
-        logger.info(f"Updated risk assessment for document "
-                   f"'{metadata['document_metadata']['document_name']}': "
-                   f"risk level: {risk_level}, "
-                   f"probability: {scam_probability}")
-        
-        return metadata

@@ -117,6 +117,8 @@ class VectorIndexer:
             List of tuples (id, embedding, metadata) ready for Pinecone upload
         """
         vectors = []
+        vector_ids_path = os.path.join(os.path.dirname(__file__), 'vector_ids.txt')
+        vector_ids_to_store = []
         
         for i, chunk in enumerate(chunks_with_embeddings):
             # Create unique ID for the vector
@@ -124,6 +126,15 @@ class VectorIndexer:
             chunk_id = chunk['metadata'].get('chunk_id', i)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             vector_id = f"{document_name}_{chunk_id}_{timestamp}_{i}"
+            
+            # Store vector_id for logging to file
+            vector_ids_to_store.append({
+                'vector_id': vector_id,
+                'document_name': document_name,
+                'chunk_id': chunk_id,
+                'timestamp': timestamp,
+                'processed_at': datetime.now().isoformat()
+            })
             
             # Prepare metadata (Pinecone has limitations on metadata size and types)
             metadata = {
@@ -156,6 +167,16 @@ class VectorIndexer:
                     metadata[key] = str(value)
             
             vectors.append((vector_id, chunk['embedding'], metadata))
+        
+        # Write vector_ids to file for future reference
+        try:
+            with open(vector_ids_path, 'a', encoding='utf-8') as f:
+                for vector_info in vector_ids_to_store:
+                    # Write as JSON for easy parsing later
+                    f.write(json.dumps(vector_info) + '\n')
+            logger.info(f"Stored {len(vector_ids_to_store)} vector IDs to {vector_ids_path}")
+        except Exception as e:
+            logger.warning(f"Failed to write vector IDs to file: {str(e)}")
         
         logger.info(f"Prepared {len(vectors)} vectors for upload")
         return vectors

@@ -15,7 +15,7 @@ from datetime import datetime
 from document_parser import DocumentParser
 from data_normalizer import DataNormalizer
 from document_chunker import DocumentChunker
-from metadata_tagger import MetadataTagger
+from database.metadata_tagger_backup import MetadataTagger
 from embedding_generator import EmbeddingGenerator
 from vector_indexer import VectorIndexer
 

@@ -58,18 +58,23 @@ class DocumentParser:
             # Convert DataFrame to text representation
             text_content = df.to_string(index=False)
             
+            # Detect scam label columns
+            scam_label_info = self._detect_scam_label_columns(df)
+            
             # Extract basic metadata
             metadata = {
                 'columns': list(df.columns),
                 'row_count': len(df),
                 'column_count': len(df.columns),
-                'data_types': df.dtypes.to_dict()
+                'data_types': df.dtypes.to_dict(),
+                'scam_label_info': scam_label_info
             }
             
             return {
                 'content': text_content,
                 'metadata': metadata,
-                'dataframe': df  # Keep original DataFrame for potential future use
+                'dataframe': df,  # Keep original DataFrame for potential future use
+                'scam_labels': scam_label_info.get('labels', []) if scam_label_info['has_scam_labels'] else None
             }
         except Exception as e:
             logger.error(f"Error parsing CSV {file_path}: {str(e)}")
@@ -128,6 +133,71 @@ class DocumentParser:
         }
         
         return result
+    
+    def _detect_scam_label_columns(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Detect columns that contain scam labels (0/1 values)
+        
+        Args:
+            df: Pandas DataFrame to analyze
+            
+        Returns:
+            Dictionary with scam label information
+        """
+        # Possible column names that might contain scam labels
+        scam_column_names = ['class', 'label', 'target', 'scam', 'fraud', 'is_scam', 
+                            'is_fraud', 'spam', 'malicious', 'phishing', 'classification']
+        
+        scam_info = {
+            'has_scam_labels': False,
+            'scam_columns': [],
+            'labels': [],
+            'scam_distribution': {}
+        }
+        
+        for col in df.columns:
+            col_lower = col.lower()
+            
+            # Check if column name suggests it's a label column
+            is_potential_label_col = any(name in col_lower for name in scam_column_names)
+            
+            # Check if column contains only 0s and 1s (or mostly 0s and 1s)
+            unique_values = df[col].dropna().unique()
+            contains_binary = all(str(val).strip() in ['0', '1', '0.0', '1.0'] for val in unique_values)
+            
+            if is_potential_label_col and contains_binary:
+                scam_info['has_scam_labels'] = True
+                scam_info['scam_columns'].append(col)
+                
+                # Convert labels to readable format
+                labels = []
+                for _, row in df.iterrows():
+                    value = str(row[col]).strip()
+                    if value in ['1', '1.0']:
+                        labels.append('scam')
+                    elif value in ['0', '0.0']:
+                        labels.append('not_scam')
+                    else:
+                        labels.append('unknown')
+                
+                scam_info['labels'] = labels
+                
+                # Calculate distribution
+                scam_count = labels.count('scam')
+                not_scam_count = labels.count('not_scam')
+                unknown_count = labels.count('unknown')
+                
+                scam_info['scam_distribution'] = {
+                    'scam': scam_count,
+                    'not_scam': not_scam_count,
+                    'unknown': unknown_count,
+                    'total': len(labels)
+                }
+                
+                logger.info(f"Detected scam label column '{col}': {scam_count} scam, {not_scam_count} not_scam")
+                break  # Use the first matching column
+        
+        return scam_info
     
     def is_supported_format(self, file_path: str) -> bool:
         """Check if file format is supported"""
