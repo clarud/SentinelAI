@@ -1,9 +1,9 @@
 """
-Fraud Detection Document Processing Pipeline
+Fraud Detection Document Processing Pipeline with Integrated Embeddings
 
 This module provides a complete pipeline for processing documents for fraud detection,
-including parsing, normalization, chunking, metadata tagging, embedding generation,
-and vector database indexing.
+including parsing, normalization, chunking, metadata tagging, and vector database indexing
+using Pinecone's integrated embeddings.
 """
 
 import os
@@ -15,42 +15,41 @@ from datetime import datetime
 from document_parser import DocumentParser
 from data_normalizer import DataNormalizer
 from document_chunker import DocumentChunker
-from database.metadata_tagger_backup import MetadataTagger
-from embedding_generator import EmbeddingGenerator
-from vector_indexer import VectorIndexer
+from metadata_tagger_2 import MetadataTagger
+from vector_indexer_integrated import VectorIndexerIntegrated
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('fraud_detection_pipeline.log'),
+        logging.FileHandler('fraud_detection_pipeline_integrated.log'),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
 
-class FraudDetectionPipeline:
-    """Complete pipeline for processing documents for fraud detection"""
+class FraudDetectionPipelineIntegrated:
+    """Complete pipeline for processing documents for fraud detection with integrated embeddings"""
     
     def __init__(self, 
                  chunk_size: int = 1000,
                  chunk_overlap: int = 200,
-                 openai_api_key: Optional[str] = None,
                  pinecone_api_key: Optional[str] = None,
-                 pinecone_environment: Optional[str] = None,
-                 pinecone_index_name: Optional[str] = None):
+                 pinecone_index_host: Optional[str] = None,
+                 namespace: str = "fraud-detection"):
         """
-        Initialize the fraud detection pipeline
+        Initialize the fraud detection pipeline with integrated embeddings
         
         Args:
             chunk_size: Maximum size of text chunks
             chunk_overlap: Overlap between chunks
-            openai_api_key: OpenAI API key for embeddings
             pinecone_api_key: Pinecone API key for vector database
+            pinecone_index_host: Pinecone index host URL
             pinecone_environment: Pinecone environment
-            pinecone_index_name: Pinecone index name
+            namespace: Namespace for storing vectors in Pinecone
         """
+        self.namespace = namespace
         
         # Initialize components
         self.parser = DocumentParser()
@@ -61,25 +60,17 @@ class FraudDetectionPipeline:
         )
         self.tagger = MetadataTagger()
         
-        # Initialize embedding generator (may raise error if OpenAI not available)
+        # Initialize vector indexer with integrated embeddings
         try:
-            self.embedding_generator = EmbeddingGenerator(api_key=openai_api_key)
-        except Exception as e:
-            logger.warning(f"Could not initialize embedding generator: {str(e)}")
-            self.embedding_generator = None
-        
-        # Initialize vector indexer (may raise error if Pinecone not available)
-        try:
-            self.vector_indexer = VectorIndexer(
+            self.vector_indexer = VectorIndexerIntegrated(
                 api_key=pinecone_api_key,
-                environment=pinecone_environment,
-                index_name=pinecone_index_name
+                index_host=pinecone_index_host
             )
         except Exception as e:
             logger.warning(f"Could not initialize vector indexer: {str(e)}")
             self.vector_indexer = None
         
-        logger.info("Fraud detection pipeline initialized")
+        logger.info("Fraud detection pipeline with integrated embeddings initialized")
     
     def process_single_document(self, file_path: str, chunking_method: str = "semantic") -> Dict[str, Any]:
         """
@@ -127,33 +118,24 @@ class FraudDetectionPipeline:
             result['processing_summary'] = tagged_doc['processing_summary']
             logger.info("Metadata generation completed")
             
-            # Step 5: Generate embeddings (if available)
-            if self.embedding_generator:
-                logger.info("Step 5: Generating embeddings")
-                chunks_with_embeddings = self.embedding_generator.process_chunks_with_embeddings(
-                    tagged_doc['chunks_with_metadata']
+            # Step 5: Index to vector database with integrated embeddings (if available)
+            if self.vector_indexer:
+                logger.info("Step 5: Indexing to vector database with integrated embeddings")
+                
+                # Connect to index
+                self.vector_indexer.connect_to_index()
+                
+                # Index using integrated embeddings (no separate embedding step needed)
+                indexing_result = self.vector_indexer.process_and_index_document(
+                    tagged_doc['chunks_with_metadata'],
+                    namespace=self.namespace
                 )
-                result['steps_completed'].append('embedding_generation')
-                logger.info("Embedding generation completed")
-            else:
-                logger.warning("Embedding generator not available, skipping embedding generation")
-                chunks_with_embeddings = tagged_doc['chunks_with_metadata']
-                result['errors'].append("Embedding generator not available")
-            
-            # Step 6: Index to vector database (if available)
-            if self.vector_indexer and 'embedding_generation' in result['steps_completed']:
-                logger.info("Step 6: Indexing to vector database")
-                indexing_result = self.vector_indexer.process_and_index_document(chunks_with_embeddings)
                 result['steps_completed'].append('vector_indexing')
                 result['indexing_result'] = indexing_result
-                logger.info("Vector indexing completed")
+                logger.info("Vector indexing with integrated embeddings completed")
             else:
-                if not self.vector_indexer:
-                    logger.warning("Vector indexer not available, skipping vector indexing")
-                    result['errors'].append("Vector indexer not available")
-                else:
-                    logger.warning("Embeddings not generated, skipping vector indexing")
-                    result['errors'].append("Embeddings not available for indexing")
+                logger.warning("Vector indexer not available, skipping vector indexing")
+                result['errors'].append("Vector indexer not available")
             
             result['success'] = True
             logger.info(f"Document processing completed successfully: {file_path}")
@@ -245,8 +227,8 @@ class FraudDetectionPipeline:
 def main():
     """Example usage of the fraud detection pipeline"""
     
-    # Initialize pipeline
-    pipeline = FraudDetectionPipeline()
+    # Initialize pipeline with integrated embeddings
+    pipeline = FraudDetectionPipelineIntegrated()
     
     # Check pipeline status
     status = pipeline.get_pipeline_status()
