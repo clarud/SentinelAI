@@ -1,7 +1,8 @@
-from fastapi import APIRouter
-from . import health, jobs, gmail_oauth
+"""
+API Routes Package
+"""
+# Import your routers to make them easily accessible
+from .routers.gmail_oauth import router as gmail_oauth_router
 
-api_router = APIRouter()
-api_router.include_router(health.router, prefix="/health", tags=["health"])
-api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
-api_router.include_router(gmail_oauth.router, prefix="/api", tags=["gmail"])  # NEW
+# List of all API routers
+__all__ = ["gmail_oauth_router"]

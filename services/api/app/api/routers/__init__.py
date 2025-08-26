@@ -1,1 +1,0 @@
-api_router.include_router(gmail_oauth.router, prefix="/api", tags=["gmail"])

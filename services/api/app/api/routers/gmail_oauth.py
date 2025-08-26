@@ -6,8 +6,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
-
-from ...services import store_tokens
+from app.services.firestore_services import store_tokens
 
 router = APIRouter()
 
@@ -24,17 +23,16 @@ FRONTEND_SUCCESS_URL = os.getenv("FRONTEND_SUCCESS_URL", "/")
 # - openid/email/profile to reliably fetch user identity
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.modify",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile", 
     "openid",
-    "email",
-    "profile",
 ]
 
 # Use bundled client_secret.json instead of env strings (easier dev).
 # Place it at services/api/app/config/client_secret.json
-CLIENT_SECRETS_FILE = os.path.join(
-    os.path.dirname(__file__),
-    "..", "..", "config", "client_secret.json"
-)
+client_secret_path = os.getenv('GOOGLE_CLIENT_SECRET_PATH')
+if not client_secret_path or not os.path.exists(client_secret_file):
+        raise RuntimeError(f"Client secret file not found: {client_secret_file}")
 
 # Simple in-memory state store for dev (replace with Redis if needed)
 _STATE = set()
@@ -45,7 +43,7 @@ def _new_flow() -> Flow:
     Create a Flow from client_secret.json (recommended for dev).
     """
     flow = Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
+        client_secret_path,
         scopes=SCOPES,
         redirect_uri=GOOGLE_REDIRECT_URI,
     )
