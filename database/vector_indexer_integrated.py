@@ -41,6 +41,7 @@ class VectorIndexerIntegrated:
         self.api_key = api_key or os.getenv('PINECONE_API_KEY')
         self.index_host = index_host or os.getenv('PINECONE_INDEX_HOST')
         self.embedding_model = embedding_model
+        self.detailed_logger = None  # Will be set by pipeline if available
         
         if not self.api_key:
             raise ValueError(
@@ -81,6 +82,10 @@ class VectorIndexerIntegrated:
             logger.error(f"Error connecting to index: {str(e)}")
             raise
     
+    def set_detailed_logger(self, detailed_logger):
+        """Set the detailed logger for enhanced logging"""
+        self.detailed_logger = detailed_logger
+    
     def prepare_records_for_upsert(self, chunks_with_metadata: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Prepare records for upsert to Pinecone with integrated embeddings
@@ -114,7 +119,7 @@ class VectorIndexerIntegrated:
             # Prepare record for Pinecone with integrated embeddings
             record = {
                 '_id': record_id,
-                'chunk_text': chunk['text'],  # This will be embedded by Pinecone
+                'text': chunk['text'],  # This will be embedded by Pinecone
                 'document_name': chunk['metadata'].get('document_name', 'unknown'),
                 'source': chunk['metadata'].get('source', 'unknown'),
                 'risk_level': chunk['metadata'].get('risk_level', 'unknown'),
@@ -158,14 +163,14 @@ class VectorIndexerIntegrated:
         logger.info(f"Prepared {len(records)} records for upsert")
         return records
     
-    def upsert_records(self, records: List[Dict[str, Any]], namespace: str = "fraud-detection", batch_size: int = 100) -> Dict[str, Any]:
+    def upsert_records(self, records: List[Dict[str, Any]], namespace: str = "fraud-detection", batch_size: int = 90) -> Dict[str, Any]:
         """
         Upsert records to Pinecone index using integrated embeddings
         
         Args:
             records: List of records to upsert
             namespace: Namespace to upsert records to
-            batch_size: Number of records to upsert in each batch
+            batch_size: Number of records to upsert in each batch (max 96 for Pinecone)
             
         Returns:
             Dictionary with upsert statistics

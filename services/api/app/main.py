@@ -8,6 +8,7 @@ from app.api.routers import health, jobs
 
 APP_NAME = "SentinelAI API"
 CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
+PORT = 8000
 
 app = FastAPI(title=APP_NAME)
 

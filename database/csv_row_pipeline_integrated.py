@@ -15,6 +15,7 @@ from document_parser import DocumentParser
 from data_normalizer import DataNormalizer
 from metadata_tagger_2 import MetadataTagger
 from vector_indexer_integrated import VectorIndexerIntegrated
+from detailed_logging import DetailedLogger
 
 # Configure logging
 logging.basicConfig(
@@ -43,11 +44,17 @@ class CSVRowPipelineIntegrated:
         self.documents_dir = Path(documents_dir)
         self.namespace = namespace
         
+        # Initialize detailed logging
+        self.detailed_logger = DetailedLogger("csv_row_pipeline")
+        
         # Initialize components
         self.parser = DocumentParser()
         self.normalizer = DataNormalizer()
         self.tagger = MetadataTagger()
         self.indexer = VectorIndexerIntegrated()
+        
+        # Pass detailed logger to indexer
+        self.indexer.set_detailed_logger(self.detailed_logger)
         
         logger.info("CSV Row Pipeline with Integrated Embeddings initialized")
     
@@ -67,51 +74,107 @@ class CSVRowPipelineIntegrated:
             Dictionary with processed row ready for indexing
         """
         try:
+            row_idx = row_document.get('row_index', 'unknown')
+            self.detailed_logger.logger.debug(f"Starting processing row {row_idx}")
+            
+            # Debug: Check what's in the row_document
+            if not isinstance(row_document, dict):
+                error_msg = f'Invalid row document type: {type(row_document)}'
+                self.detailed_logger.log_row_failure(csv_filename, row_idx, 'parsing', error_msg)
+                return {
+                    'processing_status': 'error',
+                    'error': error_msg,
+                    'row_index': row_idx
+                }
+            
+            # Check if row has required content field
+            if 'content' not in row_document:
+                error_msg = f'Missing content field. Keys: {list(row_document.keys())}'
+                self.detailed_logger.log_row_failure(csv_filename, row_idx, 'parsing', error_msg)
+                return {
+                    'processing_status': 'error',
+                    'error': 'Missing content field',
+                    'row_index': row_idx
+                }
+            
             # Create a document structure for this row
             row_doc = {
                 'content': row_document['content'],
-                'metadata': row_document['metadata'],
+                'metadata': row_document.get('metadata', {}),
                 'file_info': {
                     **file_info,
-                    'filename': f"{csv_filename}_row_{row_document['row_index']}",
+                    'filename': f"{csv_filename}_row_{row_document.get('row_index', 0)}",
                     'source_csv': csv_filename,
-                    'row_index': row_document['row_index']
+                    'row_index': row_document.get('row_index', 0)
                 }
             }
             
             # Step 1: Normalize the row data
-            normalized_row = self.normalizer.normalize_document(row_doc)
+            try:
+                self.detailed_logger.logger.debug(f"Row {row_idx}: Starting normalization")
+                normalized_row = self.normalizer.normalize_document(row_doc)
+                self.detailed_logger.logger.debug(f"Row {row_idx}: Normalization successful")
+            except Exception as e:
+                self.detailed_logger.log_row_failure(csv_filename, row_idx, 'normalization', str(e))
+                return {
+                    'processing_status': 'error',
+                    'error': f'Normalization failed: {str(e)}',
+                    'row_index': row_idx
+                }
             
             # Step 2: Create "chunks" (for CSV rows, each row is typically one chunk)
-            chunked_row = {
-                'chunks': [{
-                    'chunk_id': f"row_{row_document['row_index']}",
-                    'text': normalized_row['content'],
-                    'chunk_size': len(normalized_row['content']),
-                    'start_position': 0,
-                    'end_position': len(normalized_row['content']),
-                    'chunking_method': 'csv_row'
-                }],
-                'chunk_count': 1,
-                'total_characters': len(normalized_row['content']),
-                'original_document': normalized_row
-            }
+            try:
+                self.detailed_logger.logger.debug(f"Row {row_idx}: Creating chunks")
+                chunked_row = {
+                    'chunks': [{
+                        'chunk_id': f"row_{row_document.get('row_index', 0)}",
+                        'text': normalized_row['content'],
+                        'chunk_size': len(normalized_row['content']),
+                        'start_position': 0,
+                        'end_position': len(normalized_row['content']),
+                        'chunking_method': 'csv_row'
+                    }],
+                    'chunk_count': 1,
+                    'total_characters': len(normalized_row['content']),
+                    'original_document': normalized_row
+                }
+                self.detailed_logger.logger.debug(f"Row {row_idx}: Chunks created successfully")
+            except Exception as e:
+                self.detailed_logger.log_row_failure(csv_filename, row_idx, 'chunking', str(e))
+                return {
+                    'processing_status': 'error',
+                    'error': f'Chunking failed: {str(e)}',
+                    'row_index': row_idx
+                }
             
             # Step 3: Tag metadata
-            tagged_row = self.tagger.create_metadata(chunked_row)
+            try:
+                self.detailed_logger.logger.debug(f"Row {row_idx}: Starting metadata tagging")
+                tagged_row = self.tagger.create_metadata(chunked_row)
+                self.detailed_logger.logger.debug(f"Row {row_idx}: Metadata tagging successful")
+            except Exception as e:
+                self.detailed_logger.log_row_failure(csv_filename, row_idx, 'metadata_tagging', str(e))
+                return {
+                    'processing_status': 'error',
+                    'error': f'Metadata tagging failed: {str(e)}',
+                    'row_index': row_idx
+                }
             
+            # Success!
+            self.detailed_logger.log_row_success(csv_filename, row_idx)
             return {
                 'chunks_with_metadata': tagged_row['chunks_with_metadata'],
                 'processing_status': 'success',
-                'row_index': row_document['row_index']
+                'row_index': row_document.get('row_index', row_idx)
             }
             
         except Exception as e:
-            logger.error(f"Error processing row {row_document['row_index']}: {str(e)}")
+            row_idx = row_document.get('row_index', 'unknown')
+            self.detailed_logger.log_row_failure(csv_filename, row_idx, 'unknown', str(e))
             return {
                 'processing_status': 'error',
                 'error': str(e),
-                'row_index': row_document['row_index']
+                'row_index': row_idx
             }
     
     def process_csv_file(self, file_path: str, max_rows: Optional[int] = None) -> Dict[str, Any]:
@@ -140,6 +203,9 @@ class CSVRowPipelineIntegrated:
             
             row_documents = parsed_csv['row_documents']
             total_rows = len(row_documents)
+            
+            # Log file start
+            self.detailed_logger.log_file_start(file_path.name, total_rows)
             
             # Limit rows if specified
             if max_rows and max_rows < total_rows:
@@ -191,6 +257,10 @@ class CSVRowPipelineIntegrated:
                 all_chunks_for_indexing, 
                 namespace=self.namespace
             )
+            
+            # Log file completion
+            vectors_indexed = indexing_result.get('total_upserted', 0)
+            self.detailed_logger.log_file_complete(file_path.name, successful_rows, vectors_indexed, failed_rows)
             
             result = {
                 'file_path': str(file_path),
@@ -358,11 +428,17 @@ def main():
     if 'final_index_stats' in results:
         print(f"\\n📈 Final Index Stats:")
         stats = results['final_index_stats']
-        print(f"  Total vectors: {stats['total_vector_count']}")
-        print(f"  Index: {stats['index_name']}")
-        print(f"  Embedding model: {stats['embedding_model']}")
+        print(f"  Total vectors: {stats.get('total_vector_count', 0)}")
+        print(f"  Index host: {stats.get('index_host', 'unknown')}")
+        print(f"  Embedding model: {stats.get('embedding_model', 'unknown')}")
+        if 'namespaces' in stats:
+            print(f"  Namespaces: {list(stats['namespaces'].keys())}")
     
     print(f"\\n✅ CSV pipeline completed! Check csv_row_pipeline_integrated.log for details.")
+    
+    # Save detailed statistics and print summary
+    pipeline.detailed_logger.save_final_stats()
+    pipeline.detailed_logger.print_summary()
     
     # Example search
     if results['total_rows_processed'] > 0:

@@ -53,7 +53,26 @@ class DocumentParser:
     def parse_csv(self, file_path: str) -> Dict[str, Any]:
         """Parse CSV file and treat each row as a separate document"""
         try:
-            df = pd.read_csv(file_path)
+            # Try to read CSV with different parameters to handle malformed data
+            try:
+                df = pd.read_csv(file_path)
+            except pd.errors.ParserError:
+                # Try with different options for malformed CSV
+                logger.warning(f"CSV parsing failed, trying with error handling for {file_path}")
+                df = pd.read_csv(file_path, on_bad_lines='skip', engine='python')
+            except Exception as e:
+                # Try with even more lenient parsing
+                logger.warning(f"Standard CSV parsing failed, using very lenient parsing for {file_path}")
+                df = pd.read_csv(file_path, on_bad_lines='skip', engine='python', quoting=1, skipinitialspace=True)
+            
+            if df.empty:
+                logger.warning(f"CSV file {file_path} is empty or could not be parsed")
+                return {
+                    'content_type': 'csv_rows',
+                    'total_rows': 0,
+                    'file_metadata': {},
+                    'row_documents': []
+                }
             
             # Detect scam label columns
             scam_label_info = self._detect_scam_label_columns(df)
@@ -80,6 +99,11 @@ class DocumentParser:
                         row_text_parts.append(f"{col}: {value}")
                 
                 row_text = " | ".join(row_text_parts)
+                
+                # Skip completely empty rows
+                if not row_text.strip():
+                    logger.warning(f"Skipping empty row {idx} in CSV {file_path}")
+                    continue
                 
                 # Create metadata for this specific row
                 row_metadata = {
