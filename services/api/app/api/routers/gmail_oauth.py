@@ -31,8 +31,8 @@ SCOPES = [
 # Use bundled client_secret.json instead of env strings (easier dev).
 # Place it at services/api/app/config/client_secret.json
 client_secret_path = os.getenv('GOOGLE_CLIENT_SECRET_PATH')
-if not client_secret_path or not os.path.exists(client_secret_file):
-        raise RuntimeError(f"Client secret file not found: {client_secret_file}")
+if not client_secret_path or not os.path.exists(client_secret_path):
+        raise RuntimeError(f"Client secret file not found: {client_secret_path}")
 
 # Simple in-memory state store for dev (replace with Redis if needed)
 _STATE = set()
