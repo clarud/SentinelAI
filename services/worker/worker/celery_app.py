@@ -3,9 +3,16 @@ from celery import Celery
 from dotenv import load_dotenv
 load_dotenv()
 
-BROKER = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-BACKEND = os.getenv("CELERY_RESULT_BACKEND", BROKER)
-celery = Celery("sentinel_ai", broker=BROKER, backend=BACKEND)
+BROKER_URL = os.getenv("CELERY_BROKER_URL", os.getenv("REDIS_URL", "redis://localhost:6379/0"))
+RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", BROKER_URL)
+
+celery = Celery(
+    "sentinel_ai",
+    broker=BROKER_URL,
+    backend=RESULT_BACKEND, 
+    include=["worker.tasks.email_task"]
+)
+
 celery.conf.update(
     task_default_queue="default",
     task_queues=None,
