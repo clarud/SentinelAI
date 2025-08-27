@@ -288,7 +288,8 @@ async def handle_notification(request: dict):
             "status": "processed",
             "message_id": message_id,
             "email": email_address,
-            "history_id": history_id
+            "history_id": history_id,
+            "From": email_data
         })
         
     except Exception as e:
