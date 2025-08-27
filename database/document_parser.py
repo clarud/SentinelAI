@@ -51,18 +51,34 @@ class DocumentParser:
             raise
     
     def parse_csv(self, file_path: str) -> Dict[str, Any]:
-        """Parse CSV file and convert to text content"""
+        """Parse CSV file and treat each row as a separate document"""
         try:
-            df = pd.read_csv(file_path)
+            # Try to read CSV with different parameters to handle malformed data
+            try:
+                df = pd.read_csv(file_path)
+            except pd.errors.ParserError:
+                # Try with different options for malformed CSV
+                logger.warning(f"CSV parsing failed, trying with error handling for {file_path}")
+                df = pd.read_csv(file_path, on_bad_lines='skip', engine='python')
+            except Exception as e:
+                # Try with even more lenient parsing
+                logger.warning(f"Standard CSV parsing failed, using very lenient parsing for {file_path}")
+                df = pd.read_csv(file_path, on_bad_lines='skip', engine='python', quoting=1, skipinitialspace=True)
             
-            # Convert DataFrame to text representation
-            text_content = df.to_string(index=False)
+            if df.empty:
+                logger.warning(f"CSV file {file_path} is empty or could not be parsed")
+                return {
+                    'content_type': 'csv_rows',
+                    'total_rows': 0,
+                    'file_metadata': {},
+                    'row_documents': []
+                }
             
             # Detect scam label columns
             scam_label_info = self._detect_scam_label_columns(df)
             
-            # Extract basic metadata
-            metadata = {
+            # Extract basic metadata about the CSV file
+            file_metadata = {
                 'columns': list(df.columns),
                 'row_count': len(df),
                 'column_count': len(df.columns),
@@ -70,12 +86,55 @@ class DocumentParser:
                 'scam_label_info': scam_label_info
             }
             
+            # Convert each row to a separate document
+            row_documents = []
+            scam_labels = scam_label_info.get('labels', []) if scam_label_info['has_scam_labels'] else []
+            
+            for idx, row in df.iterrows():
+                # Create text content for this row
+                row_text_parts = []
+                for col in df.columns:
+                    value = str(row[col]) if pd.notna(row[col]) else ""
+                    if value.strip():  # Only include non-empty values
+                        row_text_parts.append(f"{col}: {value}")
+                
+                row_text = " | ".join(row_text_parts)
+                
+                # Skip completely empty rows
+                if not row_text.strip():
+                    logger.warning(f"Skipping empty row {idx} in CSV {file_path}")
+                    continue
+                
+                # Create metadata for this specific row
+                row_metadata = {
+                    'row_index': int(idx),
+                    'csv_columns': list(df.columns),
+                    'csv_file_info': file_metadata
+                }
+                
+                # Add ground truth label if available
+                if scam_labels and idx < len(scam_labels):
+                    row_metadata['ground_truth_label'] = scam_labels[idx]
+                
+                # Add individual column values to metadata
+                for col in df.columns:
+                    safe_col_name = col.replace(' ', '_').replace('-', '_').lower()
+                    row_metadata[f'col_{safe_col_name}'] = str(row[col]) if pd.notna(row[col]) else ""
+                
+                row_documents.append({
+                    'content': row_text,
+                    'metadata': row_metadata,
+                    'row_index': int(idx)
+                })
+            
             return {
-                'content': text_content,
-                'metadata': metadata,
-                'dataframe': df,  # Keep original DataFrame for potential future use
-                'scam_labels': scam_label_info.get('labels', []) if scam_label_info['has_scam_labels'] else None
+                'content_type': 'csv_rows',
+                'total_rows': len(row_documents),
+                'file_metadata': file_metadata,
+                'row_documents': row_documents,
+                'dataframe': df  # Keep original DataFrame for reference
             }
+            
         except Exception as e:
             logger.error(f"Error parsing CSV {file_path}: {str(e)}")
             raise

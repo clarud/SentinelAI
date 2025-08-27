@@ -101,17 +101,10 @@ class MetadataTagger:
         # Get document name
         document_name = file_info.get('filename', 'unknown_document')
         
-        # Set default risk assessment (unknown until main agent processes)
-        document_risk = self.set_default_risk_assessment()
-        
-        # Create base metadata that applies to the entire document
+        # Create base metadata that applies to the entire document (minimal for CSV row processing)
         base_metadata = {
             'source': source,
             'document_name': document_name,
-            'risk_level': document_risk['risk_level'],
-            'scam_probability': document_risk['scam_probability'],
-            'document_risk_score': document_risk['risk_score'],
-            'document_risk_factors': document_risk['risk_factors'],
             'processed_timestamp': datetime.now().isoformat(),
             'file_size': file_info.get('file_size', 0),
             'file_extension': file_info.get('file_extension', ''),
@@ -131,20 +124,24 @@ class MetadataTagger:
         # Create metadata for each chunk
         chunks_with_metadata = []
         for chunk in chunked_doc.get('chunks', []):
-            # Set default risk assessment for chunks as well
-            chunk_risk = self.set_default_risk_assessment()
+            # Get ground truth label from original document metadata (if available from CSV scam detection)
+            original_metadata = original_doc.get('metadata', {})
+            ground_truth_label = original_metadata.get('ground_truth_label', 'unknown')
+            
+            # Use ground truth label as chunk risk level if available, otherwise unknown
+            chunk_risk_level = ground_truth_label if ground_truth_label in ['scam', 'not_scam'] else 'unknown'
             
             chunk_metadata = {
                 **base_metadata,  # Include all base metadata
                 'chunk_id': chunk['chunk_id'],
                 'chunk_size': chunk['chunk_size'],
-                'chunk_risk_level': chunk_risk['risk_level'],
-                'chunk_scam_probability': chunk_risk['scam_probability'],
-                'chunk_risk_score': chunk_risk['risk_score'],
-                'chunk_risk_factors': chunk_risk['risk_factors'],
+                'chunk_risk_level': chunk_risk_level,
+                'chunk_scam_probability': None,  # Will be set later by main agent if needed
                 'start_position': chunk.get('start_position'),
                 'end_position': chunk.get('end_position'),
-                'chunking_method': chunk.get('chunking_method', 'unknown')
+                'chunking_method': chunk.get('chunking_method', 'unknown'),
+                # Preserve ground truth label if available
+                'ground_truth_label': ground_truth_label
             }
             
             chunks_with_metadata.append({
@@ -152,22 +149,25 @@ class MetadataTagger:
                 'metadata': chunk_metadata
             })
         
+        # Count chunks by risk level
+        scam_chunks = sum(1 for chunk in chunks_with_metadata if chunk['metadata'].get('chunk_risk_level') == 'scam')
+        not_scam_chunks = sum(1 for chunk in chunks_with_metadata if chunk['metadata'].get('chunk_risk_level') == 'not_scam')
+        unknown_chunks = sum(1 for chunk in chunks_with_metadata if chunk['metadata'].get('chunk_risk_level') == 'unknown')
+        
         result = {
             'document_metadata': base_metadata,
             'chunks_with_metadata': chunks_with_metadata,
             'processing_summary': {
                 'total_chunks': len(chunks_with_metadata),
-                'high_risk_chunks': 0,    # Will be updated after main agent processing
-                'medium_risk_chunks': 0,  # Will be updated after main agent processing
-                'low_risk_chunks': 0,     # Will be updated after main agent processing
-                'unknown_risk_chunks': len(chunks_with_metadata)  # All chunks start as unknown
+                'scam_chunks': scam_chunks,
+                'not_scam_chunks': not_scam_chunks,
+                'unknown_chunks': unknown_chunks
             }
         }
         
         logger.info(f"Created initial metadata for document '{document_name}': "
                    f"{result['processing_summary']['total_chunks']} chunks, "
-                   f"risk level: {base_metadata['risk_level']} "
-                   f"(awaiting main agent risk assessment)")
+                   f"scam: {scam_chunks}, not_scam: {not_scam_chunks}, unknown: {unknown_chunks}")
         
         return result
     

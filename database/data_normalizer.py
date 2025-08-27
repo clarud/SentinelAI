@@ -35,18 +35,35 @@ class DataNormalizer:
     
     def extract_entities(self, text: str) -> Dict[str, List[str]]:
         """Extract common entities like emails, phone numbers, URLs"""
-        entities = {
-            'emails': self.email_pattern.findall(text),
-            'phone_numbers': [match[0] + match[1] if match[0] else match[1] 
-                            for match in self.phone_pattern.findall(text)],
-            'urls': self.url_pattern.findall(text)
-        }
-        
-        # Remove duplicates while preserving order
-        for key in entities:
-            entities[key] = list(dict.fromkeys(entities[key]))
-        
-        return entities
+        try:
+            entities = {
+                'emails': self.email_pattern.findall(text),
+                'phone_numbers': [],
+                'urls': self.url_pattern.findall(text)
+            }
+            
+            # Safely extract phone numbers
+            phone_matches = self.phone_pattern.findall(text)
+            for match in phone_matches:
+                if isinstance(match, tuple):
+                    # Handle tuple matches from regex groups
+                    phone_str = ''.join(str(part) for part in match if part)
+                else:
+                    # Handle string matches
+                    phone_str = str(match)
+                
+                if phone_str.strip():
+                    entities['phone_numbers'].append(phone_str.strip())
+            
+            # Remove duplicates while preserving order
+            for key in entities:
+                entities[key] = list(dict.fromkeys(entities[key]))
+            
+            return entities
+            
+        except Exception as e:
+            logger.warning(f"Error extracting entities: {str(e)}")
+            return {'emails': [], 'phone_numbers': [], 'urls': []}
     
     def detect_suspicious_patterns(self, text: str) -> Dict[str, Any]:
         """Detect patterns commonly associated with fraud"""
@@ -130,12 +147,14 @@ class DataNormalizer:
         
         # Create normalized document
         normalized_doc = {
+            'content': cleaned_content,  # Keep 'content' field for compatibility
             'original_content': content,
             'cleaned_content': cleaned_content,
             'entities': entities,
             'suspicious_patterns': suspicious_patterns,
             'stats': stats,
             'file_info': parsed_doc.get('file_info', {}),
+            'metadata': parsed_doc.get('metadata', {}),  # Keep metadata field
             'original_metadata': parsed_doc.get('metadata', {})
         }
         
