@@ -1,51 +1,55 @@
-# app/services/firestore_services.py
 from google.cloud import firestore
 from google.oauth2.credentials import Credentials
-import os
-from google.auth.exceptions import DefaultCredentialsError
+from datetime import datetime
 
-try:
-    # Try to initialize Firestore client
-    db = firestore.Client()
-except DefaultCredentialsError:
-    # Fallback: Create a client without default credentials
-    # You'll need to handle this case appropriately
-    db = None
-    print("Warning: Firestore client not initialized - missing credentials")
+# Firestore client
+db = firestore.Client()
+COLLECTION = "gmail_tokens"
 
 def store_tokens(user_id, token_data):
     """Store OAuth token data in Firestore"""
-    if db is None:
-        print("Error: Firestore client not initialized")
-        return False
-    
-    try:
-        db.collection('gmail_tokens').document(user_id).set(token_data, merge=True)
-        return True
-    except Exception as e:
-        print(f"Error storing tokens: {e}")
-        return False
+    db.collection(COLLECTION).document(user_id).set(token_data, merge=True)
 
 def get_tokens(user_id):
     """Retrieve OAuth token data from Firestore"""
-    if db is None:
-        print("Error: Firestore client not initialized")
+    doc = db.collection(COLLECTION).document(user_id).get()
+    if not doc.exists:
         return None
-    
-    try:
-        doc = db.collection('gmail_tokens').document(user_id).get()
-        if not doc.exists:
-            return None
+    return doc.to_dict()
+
+def create_credentials_from_dict(token_data):
+    """Create Credentials object from stored token data"""
+    if not token_data:
+        return None
         
-        data = doc.to_dict()
-        return Credentials(
-            token=data.get('token'),
-            refresh_token=data.get('refresh_token'),
-            token_uri=data.get('token_uri'),
-            client_id=data.get('client_id'),
-            client_secret=data.get('client_secret'),
-            scopes=data.get('scopes')
-        )
-    except Exception as e:
-        print(f"Error retrieving tokens: {e}")
-        return None
+    # Convert ISO string back to datetime if needed
+    expiry = token_data.get('expiry')
+    if expiry and isinstance(expiry, str):
+        expiry = datetime.fromisoformat(expiry)
+    
+    return Credentials(
+        token=token_data.get('access_token'),
+        refresh_token=token_data.get('refresh_token'),
+        token_uri=token_data.get('token_uri'),
+        client_id=token_data.get('client_id'),
+        client_secret=token_data.get('client_secret'),
+        scopes=token_data.get('scopes'),
+        expiry=expiry
+    )
+
+def update_watch_expiration(user_id: str, expiration: int):
+    """Update watch expiration timestamp in Firestore"""
+    db.collection(COLLECTION).document(user_id).set({
+        'watch_expiration': expiration
+    }, merge=True)
+
+def get_watch_expiration(user_id: str) -> int:
+    """Get watch expiration timestamp from Firestore"""
+    doc = db.collection(COLLECTION).document(user_id).get()
+    if doc.exists:
+        return doc.to_dict().get('watch_expiration', 0)
+    return 0
+
+def delete_tokens(user_id: str):
+    """Delete OAuth tokens from Firestore"""
+    db.collection(COLLECTION).document(user_id).delete()

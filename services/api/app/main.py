@@ -4,8 +4,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routers import health, jobs
-from app.api import gmail_oauth_router
+from app.api.routers import health, jobs, gmail_oauth, gmail_watch
 
 APP_NAME = "SentinelAI API"
 CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
@@ -29,4 +28,5 @@ async def ping():
 
 app.include_router(health.router, prefix="/api")
 app.include_router(jobs.router, prefix="/api")
-app.include_router(gmail_oauth_router, prefix="/api", tags=["oauth"])
+app.include_router(gmail_oauth.router, prefix="/api", tags=["auth"])
+app.include_router(gmail_watch.router, prefix="/api/gmail", tags=["gmail"])
