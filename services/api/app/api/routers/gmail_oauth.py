@@ -1,5 +1,6 @@
 import os
 from typing import Tuple, Dict, Any
+import warnings
 
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -82,7 +83,21 @@ def oauth2callback(request: Request):
 
     flow = _new_flow()
     # Complete token exchange
-    flow.fetch_token(authorization_response=str(request.url))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=Warning)
+        
+        # Complete token exchange - this is where the error was occurring
+        try:
+            flow.fetch_token(authorization_response=str(request.url))
+        except Warning as w:
+            # If it's just a scope warning, we can continue
+            if "Scope has changed" in str(w):
+                print(f"Scope warning (can be ignored): {w}")
+                # Try to continue anyway
+                if not flow.credentials:
+                    raise HTTPException(status_code=400, detail="Failed to get credentials despite scope warning")
+            else:
+                raise
 
     credentials = flow.credentials  # google.oauth2.credentials.Credentials
 
