@@ -42,24 +42,24 @@ class GmailWatcher:
         return self.service
     
     def start_watch(self, topic_name: str):
-        """Start watching for email changes"""
+        """Start watching for email changes and store startHistoryId"""
         service = self._get_service()
-        
         request = {
             'labelIds': ['INBOX'],
             'topicName': topic_name,
             'labelFilterAction': 'include'
         }
-        
         try:
             response = service.users().watch(userId='me', body=request).execute()
             expiration = response.get('expiration', int(time.time() * 1000) + 3600000)
-            
+            history_id = response.get('historyId')
             update_watch_expiration(self.user_email, expiration)
+            from app.services.firestore_services import update_start_history_id
+            update_start_history_id(self.user_email, history_id)
             return {
                 'status': 'watching',
                 'expiration': expiration,
-                'historyId': response.get('historyId')
+                'historyId': history_id
             }
         except Exception as e:
             raise Exception(f"Failed to start watch: {e}")
@@ -210,86 +210,53 @@ async def handle_notification(request: dict):
         print(f"📧 Notification for {email_address}, historyId: {history_id}")
         
         # Process the email to get full details
+        from app.services.firestore_services import get_start_history_id, update_start_history_id, store_email
         try:
             watcher = GmailWatcher(email_address)
             service = watcher._get_service()
-            
-            # Instead of using history API (which can be unreliable for recent messages),
-            # let's get the most recent messages directly
-            print("🔍 Checking for recent messages...")
-            
-            # Get the list of recent messages
-            response = service.users().messages().list(
+            start_history_id = get_start_history_id(email_address)
+            if not start_history_id:
+                print("No startHistoryId found for user, skipping notification.")
+                return JSONResponse({"status": "no_start_history_id"})
+
+            print(f"🔄 Using startHistoryId: {start_history_id}")
+            # Use Gmail history API to get only new messages
+            history = service.users().history().list(
                 userId='me',
-                maxResults=5,  # Check last 5 messages
-                labelIds=['INBOX']
+                startHistoryId=start_history_id,
+                historyTypes=['messageAdded']
             ).execute()
-            
-            messages = response.get('messages', [])
-            
-            if not messages:
-                print("ℹ️ No recent messages found in inbox")
-                return JSONResponse({"status": "no_recent_messages"})
-            
-            print(f"📥 Found {len(messages)} recent messages")
-            
-            # Process each recent message
-            for msg in messages:
-                message_id = msg['id']
-                
-                try:
-                    # Get FULL email details including body
-                    email_data = watcher.get_email_details(message_id)
-                    
-                    # Check if this message is recent (within last 5 minutes)
-                    print(f"📋 Processing message: {email_data['subject']}")
-                    
-                    # Print all email details
-                    print("\n" + "="*60)
-                    print("📧 EMAIL DETAILS")
-                    print("="*60)
-                    print(f"From: {email_data['from']}")
-                    print(f"To: {email_data['to']}")
-                    print(f"Subject: {email_data['subject']}")
-                    print(f"Date: {email_data['date']}")
-                    print(f"Message ID: {email_data['id']}")
-                    print("-"*40)
-                    print("BODY PREVIEW:")
-                    print(email_data['body_preview'])
-                    print("-"*40)
-                    print("FULL BODY (first 500 chars):")
-                    print(email_data['body'][:500] + "..." if len(email_data['body']) > 500 else email_data['body'])
-                    print("="*60 + "\n")
-                    
-                except Exception as email_error:
-                    print(f"⚠️ Error processing message {message_id}: {email_error}")
-                    continue
-            
-            # Also try the history approach for completeness
-            try:
-                print("🔄 Also trying history API approach...")
-                history = service.users().history().list(
-                    userId='me',
-                    startHistoryId=history_id,
-                    historyTypes=['messageAdded']
-                ).execute()
-                
-                history_items = history.get('history', [])
-                print(f"📊 History API returned {len(history_items)} items")
-                
-            except Exception as history_error:
-                print(f"⚠️ History API error: {history_error}")
-        
+            history_items = history.get('history', [])
+            print(f"📊 History API returned {len(history_items)} items")
+
+            processed_message_ids = set()
+            for item in history_items:
+                messages = item.get('messagesAdded', [])
+                for msg in messages:
+                    msg_id = msg['message']['id']
+                    if msg_id in processed_message_ids:
+                        continue
+                    processed_message_ids.add(msg_id)
+                    try:
+                        email_data = watcher.get_email_details(msg_id)
+                        print(f"Storing email {msg_id} for user {email_address}")
+                        store_email(email_address, email_data)
+                    except Exception as email_error:
+                        print(f"⚠️ Error processing message {msg_id}: {email_error}")
+                        continue
+
+            # Update startHistoryId to the latest historyId from this notification
+            update_start_history_id(email_address, history_id)
+
         except Exception as processing_error:
             print(f"❌ Error processing notification: {processing_error}")
             # Continue to acknowledge anyway
-        
+
         return JSONResponse({
             "status": "processed",
-            "message_id": message_id,
             "email": email_address,
             "history_id": history_id,
-            "From": email_data
+            "processed_message_ids": list(processed_message_ids)
         })
         
     except Exception as e:

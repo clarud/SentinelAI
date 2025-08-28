@@ -53,3 +53,20 @@ def get_watch_expiration(user_id: str) -> int:
 def delete_tokens(user_id: str):
     """Delete OAuth tokens from Firestore"""
     db.collection(COLLECTION).document(user_id).delete()
+
+def update_start_history_id(user_id: str, history_id: str):
+    """Update the startHistoryId in Firestore for a user"""
+    db.collection(COLLECTION).document(user_id).set({
+        'start_history_id': history_id
+    }, merge=True)
+
+def get_start_history_id(user_id: str) -> str:
+    """Get the startHistoryId from Firestore for a user"""
+    doc = db.collection(COLLECTION).document(user_id).get()
+    if doc.exists:
+        return doc.to_dict().get('start_history_id')
+    return None
+
+def store_email(user_id: str, email_data: dict):
+    """Store an email in Firestore under a subcollection 'emails'"""
+    db.collection(COLLECTION).document(user_id).collection('emails').document(email_data['id']).set(email_data)
