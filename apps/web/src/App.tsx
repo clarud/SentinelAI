@@ -5,19 +5,8 @@ export default function App() {
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  async function handleLogin() {
-    setError("");
-    try {
-      const res = await fetch("http://localhost:8000/oauth", {
-        credentials: "include", // keep if backend sets cookies, safe to remove if not
-      });
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-      const data = await res.json();
-      setToken(data.token || "");
-      setEmail(data.email || "");
-    } catch (e: any) {
-      setError(e.message || "Login failed");
-    }
+  function handleLogin() {
+    window.location.href = "https://localhost:8000/api/connect-gmail";
   }
 
   return (

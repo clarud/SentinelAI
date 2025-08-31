@@ -97,6 +97,16 @@ def oauth2callback(request: Request):
 
     store_tokens(user_email, token_data)
 
+    # Start Gmail watch immediately after authentication
+    from app.api.routers.gmail_watch import GmailWatcher
+    try:
+        watcher = GmailWatcher(user_email)
+        topic_name = os.getenv("PUBSUB_TOPIC", "projects/your-project/topics/gmail-notifications")
+        watcher.start_watch(topic_name)
+        print(f"✅ start_watch successfully called for {user_email}")
+    except Exception as e:
+        print(f"Failed to start Gmail watch for {user_email}: {e}")
+
     if FRONTEND_SUCCESS_URL:
         return RedirectResponse(FRONTEND_SUCCESS_URL, status_code=307)
 
