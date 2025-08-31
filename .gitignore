@@ -62,5 +62,6 @@ dump.rdb
 # --- Others ---
 database/documents/*
 sentinel-ai/
+*.pem
 database/vector_ids.txt
 mcp-rag-tools/
