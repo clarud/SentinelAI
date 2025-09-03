@@ -1,6 +1,7 @@
 from google.cloud import firestore
 from google.oauth2.credentials import Credentials
 from datetime import datetime
+import time
 
 # Firestore client
 db = firestore.Client()
@@ -70,3 +71,17 @@ def get_start_history_id(user_id: str) -> str:
 def store_email(user_id: str, email_data: dict):
     """Store an email in Firestore under a subcollection 'emails'"""
     db.collection(COLLECTION).document(user_id).collection('emails').document(email_data['id']).set(email_data)
+
+def get_all_watching_users() -> list:
+    """Get all users who have active Gmail watches"""
+    users = []
+    now = int(time.time())
+    docs = db.collection(COLLECTION).stream()
+    
+    for doc in docs:
+        data = doc.to_dict()
+        # If watch_expiration exists and is in the future
+        if data.get('watch_expiration', 0) > now:
+            users.append(doc.id)
+    
+    return users
