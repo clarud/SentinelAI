@@ -1,6 +1,7 @@
 from google.cloud import firestore
 from google.oauth2.credentials import Credentials
 from datetime import datetime
+from app.schema import email
 
 # Firestore client
 db = firestore.Client()
@@ -67,6 +68,6 @@ def get_start_history_id(user_id: str) -> str:
         return doc.to_dict().get('start_history_id')
     return None
 
-def store_email(user_id: str, email_data: dict):
+def store_email(user_id: str, email_data: email.EmailData):
     """Store an email in Firestore under a subcollection 'emails'"""
-    db.collection(COLLECTION).document(user_id).collection('emails').document(email_data['id']).set(email_data)
+    db.collection(COLLECTION).document(user_id).collection('emails').document(email_data.id).set(email_data.model_dump())
