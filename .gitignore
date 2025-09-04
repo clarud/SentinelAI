@@ -66,3 +66,7 @@ sentinel-ai/
 database/vector_ids.txt
 mcp-rag-tools/
 agent-env/
+data-processor-env/
+extraction-tools-env/
+gmail-tools-env/
+test/worker/*.json

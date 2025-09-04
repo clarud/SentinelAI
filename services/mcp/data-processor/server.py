@@ -10,8 +10,8 @@ from tools.process_pdf import process_pdf
 PORT = int(os.getenv("PORT", "7032"))
 
 TOOLS = {
-    "email.process": lambda args: process_email(args["document"]),
-    "pdf.process": lambda args: process_pdf(args["document"]),
+    "process_email": lambda args: process_email(args["document"]),
+    "process_pdf": lambda args: process_pdf(args["document"]),
 }
 
 async def handle(ws):

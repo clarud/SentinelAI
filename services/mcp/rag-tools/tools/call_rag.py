@@ -1,7 +1,7 @@
 from pinecone import Pinecone
 import os
 from dotenv import load_dotenv, find_dotenv
-import Dict, Any
+from typing import Dict, Any
 
 # Load .env from parent directories
 load_dotenv(find_dotenv())

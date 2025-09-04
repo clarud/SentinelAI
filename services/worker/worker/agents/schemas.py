@@ -12,3 +12,4 @@ class RiskAssessment(BaseModel):
     confidence_level: float = Field(ge=0, le=1)
     scam_probability: float = Field(ge=0, le=100)
     explanation: str
+    text: str
