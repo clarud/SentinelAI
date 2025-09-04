@@ -49,7 +49,14 @@ def get_watch_expiration(user_id: str) -> int:
     """Get watch expiration timestamp from Firestore"""
     doc = db.collection(COLLECTION).document(user_id).get()
     if doc.exists:
-        return doc.to_dict().get('watch_expiration', 0)
+        expiration = doc.to_dict().get('watch_expiration', 0)
+        # Ensure it's an integer
+        if isinstance(expiration, str):
+            try:
+                return int(expiration)
+            except ValueError:
+                return 0
+        return expiration
     return 0
 
 def delete_tokens(user_id: str):
@@ -76,13 +83,22 @@ def store_email(user_id: str, email_data: email.EmailData):
 def get_all_watching_users() -> list:
     """Get all users who have active Gmail watches"""
     users = []
-    now = int(time.time())
+    now = int(time.time() * 1000)  # Use milliseconds to match watch expiration format
     docs = db.collection(COLLECTION).stream()
     
     for doc in docs:
         data = doc.to_dict()
         # If watch_expiration exists and is in the future
-        if data.get('watch_expiration', 0) > now:
+        watch_expiration = data.get('watch_expiration', 0)
+        
+        # Convert to int if it's stored as string
+        if isinstance(watch_expiration, str):
+            try:
+                watch_expiration = int(watch_expiration)
+            except ValueError:
+                continue  # Skip if can't convert
+        
+        if watch_expiration > now:
             users.append(doc.id)
     
     return users
