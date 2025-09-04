@@ -9,6 +9,8 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
 from app.services.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration, get_all_watching_users
 from app.api.routers.gmail_oauth import get_gmail_service
+from app.services.celery_client import celery
+from app.schema import email
 
 router = APIRouter()
 
@@ -190,24 +192,24 @@ def stop_watch(user_email: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/notifications")
-async def handle_notification(request: dict):
+async def handle_notification(request: email.NotificationRequest):
     """Handle Gmail push notifications and print email details"""
     try:
-        print(f"📨 Received notification: {json.dumps(request, indent=2)[:500]}...")
-        
+        print(f"📨 Received notification: {json.dumps(request.model_dump(), indent=2)[:500]}...")
+
         # Check for subscription verification
-        if request.get('challenge'):
+        if request.challenge:
             print("✅ Subscription verification challenge received")
-            return JSONResponse({"challenge": request['challenge']})
-        
+            return email.NotificationResponse(status="verified").model_dump()
+
         # Parse Pub/Sub message
-        message = request.get('message', {})
-        message_id = message.get('messageId')
-        data = message.get('data', '')
-        
+        message = request.message
+        message_id = message.message_id
+        data = message.data
+
         if not data:
             print("⚠️ No data in message")
-            return JSONResponse({"status": "no data"})
+            return email.NotificationResponse(status="no_data").model_dump()
         
         # Decode and parse notification
         try:
@@ -215,7 +217,7 @@ async def handle_notification(request: dict):
             notification = json.loads(decoded_data)
         except Exception as e:
             print(f"❌ Failed to decode notification: {e}")
-            return JSONResponse({"status": "decode_error"})
+            return email.NotificationResponse(status="decode_error").model_dump()
         
         email_address = notification.get('emailAddress')
         history_id = notification.get('historyId')
@@ -230,7 +232,7 @@ async def handle_notification(request: dict):
             start_history_id = get_start_history_id(email_address)
             if not start_history_id:
                 print("No startHistoryId found for user, skipping notification.")
-                return JSONResponse({"status": "no_start_history_id"})
+                return email.NotificationResponse(status="no_start_history_id", email_data=None,).model_dump()
 
             print(f"🔄 Using startHistoryId: {start_history_id}")
             # Use Gmail history API to get only new messages
@@ -252,8 +254,25 @@ async def handle_notification(request: dict):
                     processed_message_ids.add(msg_id)
                     try:
                         email_data = watcher.get_email_details(msg_id)
+                        email_data = email.EmailData(
+                            id=email_data['id'],
+                            sender=email_data['from'],
+                            subject=email_data['subject'],
+                            date=email_data['date'],
+                            to=email_data['to'],
+                            snippet=email_data['snippet'],
+                            threadId=email_data['threadId'],
+                            body=email_data['body'],
+                            body_preview=email_data['body_preview']
+                        )
+
+                        task = celery.send_task("email_triage", args=[email_data.model_dump()])
+
                         print(f"Storing email {msg_id} for user {email_address}")
+                        print(f"Email details: From: {email_data.sender}, Subject: {email_data.subject}, Date: {email_data.date}, To: {email_data.to}, Snippet: {email_data.snippet}")
                         store_email(email_address, email_data)
+
+        
                     except Exception as email_error:
                         print(f"⚠️ Error processing message {msg_id}: {email_error}")
                         continue
@@ -265,13 +284,9 @@ async def handle_notification(request: dict):
             print(f"❌ Error processing notification: {processing_error}")
             # Continue to acknowledge anyway
 
-        return JSONResponse({
-            "status": "processed",
-            "email": email_address,
-            "history_id": history_id,
-            "processed_message_ids": list(processed_message_ids),
-            "email_data": email_data
-        })
+        print(f"Celery Task Added Task ID: {task.id}")
+        return email.NotificationResponse(status="processed", email=email_address, history_id=str(history_id), processed_message_ids=list(processed_message_ids), email_data=email_data, task_id=task.id).model_dump()
+
         
     except Exception as e:
         print(f"❌ Notification error: {e}")

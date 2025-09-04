@@ -70,3 +70,5 @@ data-processor-env/
 extraction-tools-env/
 gmail-tools-env/
 test/worker/*.json
+client_secret.json
+application_credentials.json
