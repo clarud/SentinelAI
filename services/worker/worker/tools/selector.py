@@ -37,11 +37,12 @@ def scam_executer(document: Any, final_result=None) -> List[Dict[str, Any]]:
     """Execute actions for scam documents."""
     steps: List[Dict[str, Any]] = []
     
-    # Classify the email for further processing
-    steps.append({"server": "gmail-tools", "tool": "classify_email", "args": {"document": document}})
-    
-    # Send report to drive
-    steps.append({"server": "gmail-tools", "tool": "send_report_to_drive", "args": {"output": final_result}})
+    if isinstance(document, dict):
+        # Classify the email for further processing
+        steps.append({"server": "gmail-tools", "tool": "classify_email", "args": {"document": document}})
+        
+        # Send report to drive
+        steps.append({"server": "gmail-tools", "tool": "send_report_to_drive", "args": {"output": final_result}})
     
     # Store in RAG database for future reference
     steps.append({"server": "rag-tools", "tool": "store_rag", "args": {"output": final_result}})

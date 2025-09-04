@@ -134,6 +134,8 @@ Input:
 
 Return a JSON response with your answer.
 
+CRITICAL: Return ONLY valid JSON. Escape all newlines as '\\n'. Do NOT include any explanatory text before or after the JSON.
+
 Required Output Format:
 {
   "response": "Your helpful response to the user's question"
@@ -156,6 +158,8 @@ Input:
 
 Return a JSON response with your analysis.
 
+CRITICAL: Return ONLY valid JSON. Escape all newlines as '\\n'. Do NOT include any explanatory text before or after the JSON.
+
 Required Output Format:
 {
   "response": "Your detailed analysis of the scenario, including specific red flags and recommendations"
@@ -176,6 +180,8 @@ Input:
 - conversation_history: Previous conversation context
 
 Return a JSON response with your advice.
+
+CRITICAL: Return ONLY valid JSON. Escape all newlines as '\\n'. Do NOT include any explanatory text before or after the JSON.
 
 Required Output Format:
 {
