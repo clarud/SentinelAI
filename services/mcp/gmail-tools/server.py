@@ -9,12 +9,19 @@ services_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 sys.path.append(services_path)
 
 from tools.gmail_tools import modify_labels, mark_as_scam
+from tools.google_drive_tool import create_and_upload_analysis_pdf
 
 PORT = int(os.getenv("PORT", "7032"))
 
 TOOLS = {
     "gmail.markAsScam": lambda args: mark_as_scam(args["user_email"], args["message_id"]),
     "gmail.modifyLabels": lambda args: modify_labels(args["user_email"], args["message_id"], args.get("add_labels"), args.get("remove_labels")),
+    "drive.uploadAnalysis": lambda args: create_and_upload_analysis_pdf(
+        args["user_email"], 
+        args["message_id"], 
+        args["analysis_data"], 
+        args.get("title", "Email Analysis")
+    ),
 }
 
 async def handle(ws):

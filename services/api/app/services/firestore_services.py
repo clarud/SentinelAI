@@ -103,3 +103,28 @@ def get_all_watching_users() -> list:
     
     return users
 
+DRIVE_FILES_COLLECTION = "drive_files"
+
+def store_drive_file_link(user_id: str, file_data: dict):
+    """Store Google Drive file link in Firestore"""
+    file_data['uploaded_at'] = datetime.now()
+    db.collection(DRIVE_FILES_COLLECTION).document(user_id).collection('files').document(file_data['file_id']).set(file_data, merge=True)
+
+def get_drive_files(user_id: str, limit: int = 50):
+    """Retrieve user's Drive files from Firestore"""
+    files_ref = db.collection(DRIVE_FILES_COLLECTION).document(user_id).collection('files')
+    docs = files_ref.order_by('uploaded_at', direction=firestore.Query.DESCENDING).limit(limit).stream()
+    
+    files = []
+    for doc in docs:
+        file_data = doc.to_dict()
+        files.append(file_data)
+    
+    return files
+
+def get_drive_file(user_id: str, file_id: str):
+    """Get specific Drive file by file ID"""
+    doc = db.collection(DRIVE_FILES_COLLECTION).document(user_id).collection('files').document(file_id).get()
+    if doc.exists:
+        return doc.to_dict()
+    return None
