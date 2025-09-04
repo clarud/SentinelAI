@@ -65,3 +65,5 @@ sentinel-ai/
 *.pem
 database/vector_ids.txt
 mcp-rag-tools/
+client_secret.json
+application_credentials.json
