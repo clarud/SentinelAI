@@ -2,11 +2,12 @@ import time
 import os
 import base64
 import json
-from fastapi import APIRouter, HTTPException
+import asyncio
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
-from app.services.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration
+from app.services.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration, get_all_watching_users
 from app.api.routers.gmail_oauth import get_gmail_service
 from app.services.celery_client import celery
 from app.schema import email
@@ -75,6 +76,18 @@ class GmailWatcher:
             return {'status': 'stopped'}
         except Exception as e:
             raise Exception(f"Failed to stop watch: {e}")
+
+    def refresh_watch_if_needed(self):
+        """Refresh watch if it's about to expire"""
+        from app.services.firestore_services import get_watch_expiration
+        expiration = get_watch_expiration(self.user_email)
+        current_time = int(time.time() * 1000)
+        
+        # Refresh if no expiration or will expire in next 5 minutes
+        if not expiration or current_time >= (expiration - (5 * 60 * 1000)):
+            topic_name = os.getenv("PUBSUB_TOPIC")
+            return self.start_watch(topic_name)
+        return None
     
     def get_email(self, message_id: str):
         """Fetch email content by message ID"""
@@ -288,3 +301,32 @@ def test_email_fetch(user_email: str, message_id: str):
         return JSONResponse(email_data)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+# Background task to refresh watches
+@router.on_event("startup")
+async def start_watch_refresh_task():
+    """Start the background task to periodically refresh watches"""
+    asyncio.create_task(periodic_watch_refresh())
+
+async def periodic_watch_refresh():
+    """Periodically refresh watches before they expire"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    while True:
+        logger.info("Running watch refresh task")
+        try:
+            users = get_all_watching_users()
+            for user_email in users:
+                try:
+                    watcher = GmailWatcher(user_email)
+                    result = watcher.refresh_watch_if_needed()
+                    if result:
+                        logger.info(f"Refreshed watch for {user_email}")
+                except Exception as e:
+                    logger.error(f"Failed to refresh watch for {user_email}: {e}")
+        except Exception as e:
+            logger.error(f"Watch refresh task error: {e}")
+            
+        # Wait for 5 minutes before next refresh
+        await asyncio.sleep(300)
