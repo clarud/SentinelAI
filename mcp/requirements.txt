@@ -32,3 +32,6 @@ cachetools>=5.0.0  # Used by google-auth
 pyasn1>=0.4.8  # Used by google-auth
 pyasn1-modules>=0.2.8  # Used by google-auth
 rsa>=4.8  # Used by google-auth
+
+# Others
+fastapi
