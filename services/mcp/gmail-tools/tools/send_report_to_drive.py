@@ -1,0 +1,249 @@
+"""
+Report generation and storage tool for sending analysis reports to Google Drive.
+"""
+
+from typing import Dict, Any
+import json
+from datetime import datetime
+import uuid
+
+
+def send_report_to_drive(report_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Generate and send a fraud detection report to Google Drive.
+    
+    Args:
+        report_data: Analysis results and metadata to include in report
+        
+    Returns:
+        dict: Report generation status and metadata
+    """
+    if not isinstance(report_data, dict):
+        raise ValueError("Report data must be a dictionary")
+    
+    # Generate unique report ID
+    report_id = f"RPT-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8]}"
+    
+    # Create report structure
+    report = _generate_report_structure(report_data, report_id)
+    
+    # Format report content
+    formatted_report = _format_report_content(report)
+    
+    # Simulate sending to Google Drive (placeholder implementation)
+    drive_response = _send_to_google_drive(formatted_report, report_id)
+    
+    return {
+        "status": "success",
+        "report_id": report_id,
+        "timestamp": datetime.now().isoformat(),
+        "file_size": len(formatted_report),
+        "drive_file_id": drive_response.get("file_id"),
+        "share_url": drive_response.get("share_url"),
+        "metadata": {
+            "classification": report_data.get("classification", "unknown"),
+            "threat_level": report_data.get("threat_level", "unknown"),
+            "confidence": report_data.get("confidence", 0.0)
+        }
+    }
+
+
+def _generate_report_structure(report_data: Dict[str, Any], report_id: str) -> Dict[str, Any]:
+    """Generate the structured report data."""
+    
+    return {
+        "report_header": {
+            "report_id": report_id,
+            "generated_at": datetime.now().isoformat(),
+            "report_type": "fraud_detection_analysis",
+            "version": "1.0"
+        },
+        "executive_summary": {
+            "classification": report_data.get("is_scam", "unknown"),
+            "confidence_level": report_data.get("confidence_level", 0.0),
+            "scam_probability": report_data.get("scam_probability", 0.0),
+            "threat_level": report_data.get("threat_level", "unknown"),
+            "recommendation": _generate_recommendation(report_data)
+        },
+        "analysis_details": {
+            "document_analysis": report_data.get("document_text", ""),
+            "tool_evidence": report_data.get("tool_evidence", []),
+            "risk_factors": _extract_risk_factors(report_data),
+            "similar_documents": _extract_similar_documents(report_data)
+        },
+        "technical_details": {
+            "tools_used": _extract_tools_used(report_data),
+            "processing_time": report_data.get("processing_time", "unknown"),
+            "model_version": report_data.get("model_version", "unknown")
+        },
+        "appendix": {
+            "raw_data": report_data,
+            "errors": report_data.get("tool_errors", [])
+        }
+    }
+
+
+def _format_report_content(report: Dict[str, Any]) -> str:
+    """Format the report into a readable document."""
+    
+    content = f"""
+# Fraud Detection Analysis Report
+
+## Report Information
+- **Report ID**: {report['report_header']['report_id']}
+- **Generated**: {report['report_header']['generated_at']}
+- **Type**: {report['report_header']['report_type']}
+
+## Executive Summary
+- **Classification**: {report['executive_summary']['classification']}
+- **Confidence Level**: {report['executive_summary']['confidence_level']}
+- **Scam Probability**: {report['executive_summary']['scam_probability']}%
+- **Threat Level**: {report['executive_summary']['threat_level']}
+- **Recommendation**: {report['executive_summary']['recommendation']}
+
+## Analysis Details
+
+### Document Content
+```
+{report['analysis_details']['document_analysis'][:500]}{'...' if len(report['analysis_details']['document_analysis']) > 500 else ''}
+```
+
+### Risk Factors Identified
+"""
+    
+    for factor in report['analysis_details']['risk_factors']:
+        content += f"- {factor}\n"
+    
+    content += f"""
+### Similar Documents Found
+- **Count**: {len(report['analysis_details']['similar_documents'])}
+"""
+    
+    for doc in report['analysis_details']['similar_documents'][:3]:  # Show first 3
+        content += f"- {doc.get('snippet', 'No snippet available')} (Risk: {doc.get('risk_level', 'unknown')})\n"
+    
+    content += f"""
+## Technical Details
+
+### Tools Used
+"""
+    
+    for tool in report['technical_details']['tools_used']:
+        content += f"- {tool}\n"
+    
+    if report['appendix']['errors']:
+        content += f"""
+### Errors Encountered
+"""
+        for error in report['appendix']['errors']:
+            content += f"- {error.get('tool', 'unknown')}: {error.get('error', 'unknown error')}\n"
+    
+    content += f"""
+---
+*This report was automatically generated by SentinelAI Fraud Detection System*
+"""
+    
+    return content
+
+
+def _generate_recommendation(report_data: Dict[str, Any]) -> str:
+    """Generate recommendation based on analysis results."""
+    
+    classification = report_data.get("is_scam", "unknown")
+    confidence = report_data.get("confidence_level", 0.0)
+    threat_level = report_data.get("threat_level", "unknown")
+    
+    if classification == "scam" and confidence > 0.8:
+        return "BLOCK - High confidence fraud detection. Recommend immediate blocking and user notification."
+    elif classification == "scam" and confidence > 0.6:
+        return "QUARANTINE - Likely fraud. Recommend quarantine for manual review."
+    elif classification == "not_scam" and confidence > 0.8:
+        return "ALLOW - High confidence legitimate content. Safe to proceed."
+    elif threat_level in ["high", "critical"]:
+        return "REVIEW - High threat level detected. Recommend manual security review."
+    else:
+        return "MONITOR - Uncertain classification. Recommend continued monitoring."
+
+
+def _extract_risk_factors(report_data: Dict[str, Any]) -> list:
+    """Extract risk factors from the analysis data."""
+    
+    risk_factors = []
+    
+    # Extract from tool evidence
+    tool_evidence = report_data.get("tool_evidence", [])
+    for evidence in tool_evidence:
+        tool_name = evidence.get("tool", "")
+        output = evidence.get("output", {})
+        
+        if "extract_link" in tool_name and isinstance(output, dict):
+            if output.get("high_risk_count", 0) > 0:
+                risk_factors.append(f"High-risk links detected: {output.get('high_risk_count')}")
+        
+        elif "extract_number" in tool_name and isinstance(output, dict):
+            if output.get("is_suspicious", False):
+                risk_factors.append("Suspicious numeric patterns detected")
+        
+        elif "classify_email" in tool_name and isinstance(output, dict):
+            if output.get("threat_level") in ["high", "critical"]:
+                risk_factors.append(f"High threat classification: {output.get('classification')}")
+    
+    # Add general risk factors
+    if report_data.get("scam_probability", 0) > 70:
+        risk_factors.append("High scam probability from similar documents")
+    
+    return risk_factors
+
+
+def _extract_similar_documents(report_data: Dict[str, Any]) -> list:
+    """Extract information about similar documents from RAG results."""
+    
+    similar_docs = []
+    
+    tool_evidence = report_data.get("tool_evidence", [])
+    for evidence in tool_evidence:
+        if "call_rag" in evidence.get("tool", ""):
+            output = evidence.get("output", {})
+            if isinstance(output, dict) and "results" in output:
+                for result in output["results"][:5]:  # Limit to 5
+                    similar_docs.append({
+                        "snippet": result.get("text", "")[:100] + "...",
+                        "risk_level": result.get("is_scam", "unknown"),
+                        "confidence": result.get("confidence_level", 0.0)
+                    })
+    
+    return similar_docs
+
+
+def _extract_tools_used(report_data: Dict[str, Any]) -> list:
+    """Extract list of tools used in the analysis."""
+    
+    tools = set()
+    
+    tool_evidence = report_data.get("tool_evidence", [])
+    for evidence in tool_evidence:
+        tool_name = evidence.get("tool", "unknown")
+        tools.add(tool_name)
+    
+    return sorted(list(tools))
+
+
+def _send_to_google_drive(content: str, report_id: str) -> Dict[str, Any]:
+    """
+    Simulate sending report to Google Drive.
+    In a real implementation, this would use Google Drive API.
+    """
+    
+    # Placeholder implementation
+    # In real implementation, would:
+    # 1. Authenticate with Google Drive API
+    # 2. Create or update file
+    # 3. Set appropriate permissions
+    # 4. Return actual file ID and share URL
+    
+    return {
+        "file_id": f"drive_file_{report_id}_{uuid.uuid4().hex[:8]}",
+        "share_url": f"https://drive.google.com/file/d/{uuid.uuid4().hex}/view",
+        "status": "uploaded",
+        "folder": "SentinelAI_Reports"
+    }

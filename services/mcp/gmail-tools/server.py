@@ -1,3 +1,5 @@
+# Gmail tools MCP server with WebSocket support
+
 import os
 import json
 import asyncio
@@ -10,10 +12,14 @@ sys.path.append(services_path)
 
 from tools.gmail_tools import modify_labels, mark_as_scam
 from tools.google_drive_tool import create_and_upload_analysis_pdf
+from tools.classify_email import classify_email
+from tools.send_report_to_drive import send_report_to_drive
 
-PORT = int(os.getenv("PORT", "7032"))
+PORT = int(os.getenv("PORT", "7034"))
 
 TOOLS = {
+    "classify_email": lambda args: classify_email(args["email_data"]),
+    "send_report_to_drive": lambda args: send_report_to_drive(args["report_data"]),
     "gmail.markAsScam": lambda args: mark_as_scam(args["user_email"], args["message_id"]),
     "gmail.modifyLabels": lambda args: modify_labels(args["user_email"], args["message_id"], args.get("add_labels"), args.get("remove_labels")),
     "drive.uploadAnalysis": lambda args: create_and_upload_analysis_pdf(
@@ -45,9 +51,9 @@ async def handle(ws):
             await ws.send(json.dumps({"type": "tool_result", "ok": False, "error": str(e)}))
 
 async def main():
-    async with websockets.serve(handle, "localhost", PORT):
-        print(f"Gmail Tools MCP server running on ws://localhost:{PORT}")
-        await asyncio.Future()  # run forever
+    print(f"[gmail-tools] ws://0.0.0.0:{PORT}")
+    async with websockets.serve(handle, "0.0.0.0", PORT, ping_interval=None):
+        await asyncio.Future()
 
 if __name__ == "__main__":
     asyncio.run(main())

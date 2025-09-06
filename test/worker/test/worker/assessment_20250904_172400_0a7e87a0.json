@@ -1,0 +1,68 @@
+{
+  "workflow_id": "0a7e87a0",
+  "start_time": 1756977840.525045,
+  "start_timestamp": "2025-09-04T17:24:00.525274",
+  "steps": [
+    {
+      "step_id": 1,
+      "step_name": "test_step",
+      "description": "Testing step logging functionality",
+      "start_time": 1756977840.525952,
+      "start_timestamp": "2025-09-04T17:24:00.525952",
+      "end_time": 1756977840.631121,
+      "end_timestamp": "2025-09-04T17:24:00.631130",
+      "duration": 0.10516881942749023,
+      "metadata": {
+        "test_data": "success"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "decision_name": "test_decision",
+      "condition": "confidence > 0.8",
+      "result": true,
+      "timestamp": "2025-09-04T17:24:00.632174",
+      "metadata": {
+        "route": "test_route"
+      }
+    }
+  ],
+  "tool_calls": [
+    {
+      "server": "test-server",
+      "tool": "test-tool",
+      "args": {
+        "arg1": "value1"
+      },
+      "timestamp": "2025-09-04T17:24:00.632251",
+      "success": true,
+      "output": "test output"
+    }
+  ],
+  "performance_metrics": {
+    "test_metric": {
+      "value": 1.23,
+      "unit": "seconds",
+      "timestamp": "2025-09-04T17:24:00.632313"
+    }
+  },
+  "errors": [],
+  "final_result": {
+    "is_scam": "not_scam",
+    "confidence_level": 0.9,
+    "scam_probability": 15.0,
+    "explanation": "Test assessment result"
+  },
+  "document_info": {
+    "type": "dict",
+    "length": 50
+  },
+  "document_id": "test_doc_001",
+  "end_time": 1756977840.632591,
+  "end_timestamp": "2025-09-04T17:24:00.632592",
+  "total_processing_time": 2.5,
+  "evidence_count": 3,
+  "error_count": 0,
+  "workflow_duration": 0.10754609107971191
+}
