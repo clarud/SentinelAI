@@ -7,3 +7,4 @@ s3transfer==0.13.1
 six==1.17.0
 urllib3==1.26.20
 websockets==15.0.1
+celery==5.5.3
