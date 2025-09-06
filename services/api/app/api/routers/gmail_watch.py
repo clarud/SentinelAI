@@ -7,10 +7,10 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
-from app.services.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration, get_all_watching_users
-from app.api.routers.gmail_oauth import get_gmail_service
-from app.services.celery_client import celery
-from app.schema import email
+from api.app.services.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration, get_all_watching_users
+from api.app.api.routers.gmail_oauth import get_gmail_service
+from api.app.services.celery_client import celery
+from api.app.schema import email
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ class GmailWatcher:
                 'access_token': credentials.token,
                 'expiry': credentials.expiry.isoformat() if credentials.expiry else None
             })
-            from app.services.firestore_services import store_tokens
+            from api.app.services.firestore_services import store_tokens
             store_tokens(self.user_email, token_data)
         
         self.service = build("gmail", "v1", credentials=credentials)
@@ -57,7 +57,7 @@ class GmailWatcher:
             expiration = response.get('expiration', int(time.time() * 1000) + 3600000)
             history_id = response.get('historyId')
             update_watch_expiration(self.user_email, expiration)
-            from app.services.firestore_services import update_start_history_id
+            from api.app.services.firestore_services import update_start_history_id
             update_start_history_id(self.user_email, history_id)
             return {
                 'status': 'watching',
@@ -79,7 +79,7 @@ class GmailWatcher:
 
     def refresh_watch_if_needed(self):
         """Refresh watch if it's about to expire"""
-        from app.services.firestore_services import get_watch_expiration
+        from api.app.services.firestore_services import get_watch_expiration
         expiration = get_watch_expiration(self.user_email)
         current_time = int(time.time() * 1000)
         
@@ -225,7 +225,7 @@ async def handle_notification(request: email.NotificationRequest):
         print(f"📧 Notification for {email_address}, historyId: {history_id}")
         
         # Process the email to get full details
-        from app.services.firestore_services import get_start_history_id, update_start_history_id, store_email
+        from api.app.services.firestore_services import get_start_history_id, update_start_history_id, store_email
         try:
             watcher = GmailWatcher(email_address)
             service = watcher._get_service()

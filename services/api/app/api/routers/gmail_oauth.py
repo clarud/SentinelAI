@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
-from app.services.firestore_services import store_tokens, get_tokens, create_credentials_from_dict
+from api.app.services.firestore_services import store_tokens, get_tokens, create_credentials_from_dict
 
 router = APIRouter()
 
@@ -98,7 +98,7 @@ def oauth2callback(request: Request):
     store_tokens(user_email, token_data)
 
     # Start Gmail watch immediately after authentication
-    from app.api.routers.gmail_watch import GmailWatcher
+    from api.app.api.routers.gmail_watch import GmailWatcher
     try:
         watcher = GmailWatcher(user_email)
         topic_name = os.getenv("PUBSUB_TOPIC", "projects/your-project/topics/gmail-notifications")

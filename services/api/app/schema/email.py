@@ -32,3 +32,6 @@ class NotificationResponse(BaseModel):
     processed_message_id: Optional[list[str]] = None
     email_data: Optional[EmailData] = None
     task_id: Optional[str] = None
+
+class StringRequest(BaseModel):
+    text: str

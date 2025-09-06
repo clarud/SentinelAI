@@ -1,7 +1,7 @@
 from google.cloud import firestore
 from google.oauth2.credentials import Credentials
 from datetime import datetime
-from app.schema import email
+from api.app.schema import email
 import time
 
 # Firestore client
@@ -49,7 +49,14 @@ def get_watch_expiration(user_id: str) -> int:
     """Get watch expiration timestamp from Firestore"""
     doc = db.collection(COLLECTION).document(user_id).get()
     if doc.exists:
-        return doc.to_dict().get('watch_expiration', 0)
+        expiration = doc.to_dict().get('watch_expiration', 0)
+        # Ensure we return an integer
+        if isinstance(expiration, str):
+            try:
+                return int(expiration)
+            except ValueError:
+                return 0
+        return int(expiration) if expiration else 0
     return 0
 
 def delete_tokens(user_id: str):
