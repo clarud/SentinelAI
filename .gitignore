@@ -72,3 +72,5 @@ gmail-tools-env/
 test/worker/*.json
 client_secret.json
 application_credentials.json
+*.pdf
+mcp-server-env/

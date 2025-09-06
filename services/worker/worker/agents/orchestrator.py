@@ -328,7 +328,10 @@ def assess_document(document: Any) -> Dict[str, Any]:
                     text=processed_document
                 ).model_dump()
                 logger.log_step_end(step_supervisor_idx, {"validation": "fallback", "error": str(e)})
-
+    
+    # Add raw email dict to final output if available
+    final["email"] = document if isinstance(document, dict) else None
+    
     # Step 5: EXECUTER Agent (Always Called)
     if "EXECUTER" in agents_to_call and final:
         step_executer_idx = logger.log_step_start("executer_agent", "EXECUTER agent performs final actions")

@@ -11,6 +11,14 @@ def process_document(document: Any) -> Dict[str, Any]:
     elif isinstance(document, bytes):
         # Process PDF
         return [{"server":"data-processor","tool":"process_pdf", "args":{"document": document}}]
+    elif hasattr(document, 'read'):
+        # Process file-like object (BufferedReader, etc.)
+        pdf_bytes = document.read()
+        document.seek(0)  # Reset file pointer
+        return [{"server":"data-processor","tool":"process_pdf", "args":{"document": pdf_bytes}}]
+    elif isinstance(document, str):
+        # Process plain text
+        return []
     else:
         # Unable to process this file type
         # Implement some error handling

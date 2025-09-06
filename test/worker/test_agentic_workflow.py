@@ -120,6 +120,75 @@ The GitHub Team''',
     
     return result
 
+def test_legitimate_pdf(pdf_path):
+    """Test with a legitimate PDF document to see agentic routing."""
+    print("\n🧪 Testing Agentic Workflow with Legitimate PDF")
+    print("=" * 60)
+    
+    # Open the PDF file as a file-like object
+    with open(pdf_path, "rb") as pdf_file:
+        # Pass the file object directly to assess_document
+        result = assess_document(pdf_file)
+    
+    # Print results
+    print("\n📊 AGENTIC WORKFLOW RESULTS:")
+    print("=" * 40)
+    print(f"Output: {result}")
+    print(f"Classification: {result.get('is_scam', 'unknown')}")
+    print(f"Confidence: {result.get('confidence_level', 0):.2f}")
+    print(f"Scam Probability: {result.get('scam_probability', 0):.1f}%")
+    print(f"Explanation: {result.get('explanation', 'No explanation')[:200]}...")
+    
+    metadata = result.get('processing_metadata', {})
+    print(f"\n⚡ ROUTER DECISION:")
+    print(f"Route Taken: {metadata.get('router_route', 'unknown')}")
+    print(f"Agents Called: {metadata.get('agents_called', [])}")
+    print(f"Total Time: {metadata.get('total_time', 0):.2f}s")
+    print(f"Evidence Gathered: {metadata.get('evidence_gathered', 0)}")
+    print(f"Workflow ID: {metadata.get('workflow_id', 'unknown')}")
+    
+    return result
+
+def test_legitimate_string():
+    """Test with a legitimate email as a plain string."""
+    print("\n🧪 Testing Agentic Workflow with Legitimate Email String")
+    print("=" * 60)
+    
+    legitimate_email_text = (
+        "Hello,\n\n"
+        "We're writing to let you know that a new personal access token was "
+        "created for your account.\n\n"
+        "Token name: VSCode-Integration\n"
+        "Created: September 4, 2025 at 5:20 PM UTC\n\n"
+        "If you created this token, you can ignore this email. If you did not "
+        "create this token, please review your account security settings.\n\n"
+        "Best regards,\n"
+        "The GitHub Team"
+    )
+    
+    print(f"Email String Preview: {legitimate_email_text[:200]}...")
+    print("\n🤖 Running agentic workflow...")
+    
+    result = assess_document(legitimate_email_text)
+    
+    print("\n📊 AGENTIC WORKFLOW RESULTS:")
+    print("=" * 40)
+    print(f"Output: {result}")
+    print(f"Classification: {result.get('is_scam', 'unknown')}")
+    print(f"Confidence: {result.get('confidence_level', 0):.2f}")
+    print(f"Scam Probability: {result.get('scam_probability', 0):.1f}%")
+    print(f"Explanation: {result.get('explanation', 'No explanation')[:200]}...")
+    
+    metadata = result.get('processing_metadata', {})
+    print(f"\n⚡ ROUTER DECISION:")
+    print(f"Route Taken: {metadata.get('router_route', 'unknown')}")
+    print(f"Agents Called: {metadata.get('agents_called', [])}")
+    print(f"Total Time: {metadata.get('total_time', 0):.2f}s")
+    print(f"Evidence Gathered: {metadata.get('evidence_gathered', 0)}")
+    print(f"Workflow ID: {metadata.get('workflow_id', 'unknown')}")
+    
+    return result
+
 if __name__ == "__main__":
     print("🚀 AGENTIC ORCHESTRATOR TEST")
     print("Testing the new ROUTER-based dynamic workflow")
@@ -132,14 +201,25 @@ if __name__ == "__main__":
         # Test 2: Legitimate email (should trigger different route)
         result2 = test_legitimate_email()
         
+        # # Test 3: Legitimate PDF document (should be processed correctly)
+        # pdf_path = os.path.join(project_root, 'test', 'worker', 'legitimate_pdf.pdf')
+        # result3 = test_legitimate_pdf(pdf_path)
+        
+        # Test 4: Legitimate email as plain string
+        result4 = test_legitimate_string()
+
         print("\n🎯 COMPARISON OF ROUTER DECISIONS:")
         print("=" * 50)
         print(f"Suspicious Email Route: {result1.get('processing_metadata', {}).get('router_route', 'unknown')}")
         print(f"Legitimate Email Route: {result2.get('processing_metadata', {}).get('router_route', 'unknown')}")
-        
+        # print(f"Legitimate PDF Route: {result3.get('processing_metadata', {}).get('router_route', 'unknown')}")
+        print(f"Legitimate String Route: {result4.get('processing_metadata', {}).get('router_route', 'unknown')}")
+
         print(f"\nSuspicious Agents: {result1.get('processing_metadata', {}).get('agents_called', [])}")
         print(f"Legitimate Agents: {result2.get('processing_metadata', {}).get('agents_called', [])}")
-        
+        # print(f"Legitimate PDF Agents: {result3.get('processing_metadata', {}).get('agents_called', [])}")
+        print(f"Legitimate String Agents: {result4.get('processing_metadata', {}).get('agents_called', [])}")
+
         print("\n✅ Agentic workflow test completed!")
         print("📝 Check the assessment logs for detailed decision tracking.")
         
