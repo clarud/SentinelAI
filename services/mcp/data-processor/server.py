@@ -1,17 +1,17 @@
-# Gmail tools MCP server with WebSocket support
+# Document processing MCP server with WebSocket support
 
 import os
 import json
 import asyncio
 import websockets
-from tools.classify_email import classify_email
-from tools.send_report_to_drive import send_report_to_drive
+from tools.process_email import process_email
+from tools.process_pdf import process_pdf
 
-PORT = int(os.getenv("PORT", "7034"))
+PORT = int(os.getenv("PORT", "7032"))
 
 TOOLS = {
-    "classify_email": lambda args: classify_email(args["email_data"]),
-    "send_report_to_drive": lambda args: send_report_to_drive(args["report_data"]),
+    "process_email": lambda args: process_email(args["document"]),
+    "process_pdf": lambda args: process_pdf(args["document"]),
 }
 
 async def handle(ws):
@@ -35,7 +35,7 @@ async def handle(ws):
             await ws.send(json.dumps({"type": "tool_result", "ok": False, "error": str(e)}))
 
 async def main():
-    print(f"[gmail-tools] ws://0.0.0.0:{PORT}")
+    print(f"[data-processor] ws://0.0.0.0:{PORT}")
     async with websockets.serve(handle, "0.0.0.0", PORT, ping_interval=None):
         await asyncio.Future()
 

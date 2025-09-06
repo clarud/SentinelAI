@@ -4,10 +4,55 @@
 
 from typing import Dict, Any, List
 
-def choose_tools(text: str) -> List[Dict[str, Any]]:
+def process_document(document: Any) -> Dict[str, Any]:
+    if isinstance(document, dict):
+        # Process email
+        return [{"server":"data-processor","tool":"process_email", "args":{"document": document}}]
+    elif isinstance(document, bytes):
+        # Process PDF
+        return [{"server":"data-processor","tool":"process_pdf", "args":{"document": document}}]
+    elif hasattr(document, 'read'):
+        # Process file-like object (BufferedReader, etc.)
+        pdf_bytes = document.read()
+        document.seek(0)  # Reset file pointer
+        return [{"server":"data-processor","tool":"process_pdf", "args":{"document": pdf_bytes}}]
+    elif isinstance(document, str):
+        # Process plain text
+        return []
+    else:
+        # Unable to process this file type
+        # Implement some error handling
+        return {"error": "unsupported document type"}
+
+def choose_tools(document: str) -> List[Dict[str, Any]]:
     steps: List[Dict[str, Any]] = []
     
     # Step 1. Perform RAG using text to retrieve list of 10 or less similar documents from database.
-    steps.append({"server":"rag-tools","tool":"call_rag", "args":{"text": text}})
+    steps.append({"server":"rag-tools","tool":"call_rag", "args":{"document": document}})
+
+    return steps
+
+def not_scam_executer(final_result=None) -> List[Dict[str, Any]]:
+    """Execute actions for legitimate (not scam) documents."""
+    steps: List[Dict[str, Any]] = []
     
+    # Store in RAG database for future reference
+    steps.append({"server": "rag-tools", "tool": "store_rag", "args": {"output": final_result}})
+    
+    return steps
+
+def scam_executer(document: Any, final_result=None) -> List[Dict[str, Any]]:
+    """Execute actions for scam documents."""
+    steps: List[Dict[str, Any]] = []
+    
+    if isinstance(document, dict):
+        # Classify the email for further processing
+        steps.append({"server": "gmail-tools", "tool": "classify_email", "args": {"document": document}})
+        
+        # Send report to drive
+        steps.append({"server": "gmail-tools", "tool": "send_report_to_drive", "args": {"output": final_result}})
+    
+    # Store in RAG database for future reference
+    steps.append({"server": "rag-tools", "tool": "store_rag", "args": {"output": final_result}})
+
     return steps

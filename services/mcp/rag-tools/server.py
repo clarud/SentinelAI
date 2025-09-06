@@ -10,8 +10,8 @@ from tools.store_rag import store_rag
 PORT = int(os.getenv("PORT", "7031"))
 
 TOOLS = {
-    "rag.query": lambda args: call_rag(args["text"]),
-    "rag.store": lambda args: store_rag(args["output"]),
+    "call_rag": lambda args: call_rag(args["document"]),
+    "store_rag": lambda args: store_rag(args["output"]),
 }
 
 async def handle(ws):
