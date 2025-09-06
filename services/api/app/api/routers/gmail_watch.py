@@ -253,7 +253,7 @@ async def handle_notification(request: email.NotificationRequest):
                         continue
                     processed_message_ids.add(msg_id)
                     try:
-                        email_data = watcher.get_email_details(msid)
+                        email_data = watcher.get_email_details(msg_id)
                         email_data = email.EmailData(
                             id=email_data['id'],
                             sender=email_data['from'],
