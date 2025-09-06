@@ -45,13 +45,43 @@ def scam_executer(document: Any, final_result=None) -> List[Dict[str, Any]]:
     """Execute actions for scam documents."""
     steps: List[Dict[str, Any]] = []
     
-    if isinstance(document, dict):
-        # Classify the email for further processing
-        steps.append({"server": "gmail-tools", "tool": "classify_email", "args": {"document": document}})
+    if isinstance(document, dict) and final_result:
+        # Extract email information if available
+        user_email = document.get("email_address", "user@example.com")  # Fallback if no 'to' field
+        message_id = document.get("id", "unknown")   # Gmail message ID if available
         
-        # Send report to drive
-        steps.append({"server": "gmail-tools", "tool": "send_report_to_drive", "args": {"output": final_result}})
-    
+        # Mark email as scam in Gmail (if we have message_id)
+        if message_id != "unknown":
+            steps.append({
+                "server": "gmail-tools", 
+                "tool": "mark_as_scam", 
+                "args": {
+                    "user_email": user_email,
+                    "message_id": message_id
+                }
+            })
+        
+        # Create analysis PDF and upload to Google Drive
+        steps.append({
+            "server": "gmail-tools", 
+            "tool": "create_analysis_pdf", 
+            "args": {
+                "user_email": user_email,
+                "message_id": message_id,
+                "analysis_data": final_result,
+                "title": f"Fraud Analysis - {document.get('subject', 'Unknown Email')}"
+            }
+        })
+        
+         # Store analysis data in Gmail tools
+        steps.append({
+            "server": "gmail-tools",
+            "tool": "store_analysis_data",
+            "args": {
+                "data": final_result
+            }
+        })
+        
     # Store in RAG database for future reference
     steps.append({"server": "rag-tools", "tool": "store_rag", "args": {"output": final_result}})
 
