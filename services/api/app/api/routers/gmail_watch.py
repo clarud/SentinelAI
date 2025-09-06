@@ -253,7 +253,7 @@ async def handle_notification(request: email.NotificationRequest):
                         continue
                     processed_message_ids.add(msg_id)
                     try:
-                        email_data = watcher.get_email_details(msg_id)
+                        email_data = watcher.get_email_details(msid)
                         email_data = email.EmailData(
                             id=email_data['id'],
                             sender=email_data['from'],
@@ -263,7 +263,8 @@ async def handle_notification(request: email.NotificationRequest):
                             snippet=email_data['snippet'],
                             threadId=email_data['threadId'],
                             body=email_data['body'],
-                            body_preview=email_data['body_preview']
+                            body_preview=email_data['body_preview'],
+                            email_address=email_address
                         )
 
                         task = celery.send_task("email_triage", args=[email_data.model_dump()])
