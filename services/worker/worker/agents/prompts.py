@@ -131,6 +131,9 @@ Be helpful, accurate, and educational. Keep responses concise but informative.
 Input: 
 - current_message: The user's current question
 - conversation_history: Previous messages in the conversation
+- user_context: The user's email scam history and past assessment results
+
+If user_context is provided, consider their past experiences when crafting your response. Reference specific scam types they've encountered if relevant to their current question.
 
 Return a JSON response with your answer.
 
@@ -155,6 +158,9 @@ Provide a clear assessment with specific red flags identified.
 Input:
 - current_message: The scenario/document to analyze
 - conversation_history: Previous conversation context
+- user_context: The user's email scam history and past assessment results
+
+If user_context shows similar scam patterns they've encountered before, mention these connections to help them recognize recurring threats.
 
 Return a JSON response with your analysis.
 
@@ -178,6 +184,9 @@ Be practical and specific in your recommendations.
 Input:
 - current_message: The user's request for advice
 - conversation_history: Previous conversation context
+- user_context: The user's email scam history and past assessment results
+
+If user_context shows they're frequently targeted by specific scam types, provide targeted prevention strategies for those particular threats.
 
 Return a JSON response with your advice.
 

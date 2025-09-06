@@ -426,6 +426,7 @@ def chatbot_response(conversation: Dict[str, Any]) -> Dict[str, Any]:
     
     Args:
         conversation: {
+            "context": str,
             "current_input": str,
             "history": [
                 {"role": "user", "content": str},
@@ -451,6 +452,7 @@ def chatbot_response(conversation: Dict[str, Any]) -> Dict[str, Any]:
     """
     user_input = conversation.get("current_input", "")
     history = conversation.get("history", [])
+    context = conversation.get("context", "")
     
     # Step 1: classify intent
     intent = classify_intent(user_input)  # "qa", "scenario", "advisor"
@@ -468,7 +470,8 @@ def chatbot_response(conversation: Dict[str, Any]) -> Dict[str, Any]:
     # Step 3: prepare input with conversation history
     chat_input = {
         "current_message": user_input,
-        "conversation_history": history
+        "conversation_history": history,
+        "user_context": context
     }
     
     # Step 4: call LLM

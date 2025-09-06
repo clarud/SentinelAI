@@ -73,4 +73,6 @@ test/worker/*.json
 client_secret.json
 application_credentials.json
 *.pdf
+*.png
+*.jpg
 mcp-server-env/
