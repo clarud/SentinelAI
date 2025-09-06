@@ -225,7 +225,7 @@ async def handle_notification(request: email.NotificationRequest):
         print(f"📧 Notification for {email_address}, historyId: {history_id}")
         
         # Process the email to get full details
-        from app.services.firestore_services import get_start_history_id, update_start_history_id, store_email
+        from app.services.firestore_services import get_start_history_id, update_start_history_id
         try:
             watcher = GmailWatcher(email_address)
             service = watcher._get_service()
@@ -267,11 +267,6 @@ async def handle_notification(request: email.NotificationRequest):
                         )
 
                         task = celery.send_task("email_triage", args=[email_data.model_dump()])
-
-                        print(f"Storing email {msg_id} for user {email_address}")
-                        print(f"Email details: From: {email_data.sender}, Subject: {email_data.subject}, Date: {email_data.date}, To: {email_data.to}, Snippet: {email_data.snippet}")
-                        store_email(email_address, email_data)
-
         
                     except Exception as email_error:
                         print(f"⚠️ Error processing message {msg_id}: {email_error}")
