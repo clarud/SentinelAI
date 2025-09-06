@@ -8,6 +8,8 @@ import websockets
 
 # Add the MCP directory to Python path to find the tool modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
+repo_root = os.path.dirname(current_dir)
+sys.path.insert(0, repo_root)
 sys.path.insert(0, current_dir)
 
 # Import all tools from different modules using correct paths
