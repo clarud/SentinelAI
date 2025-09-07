@@ -12,6 +12,7 @@ class EmailData(BaseModel):
     threadId: str
     body: str
     body_preview: str
+    email_address: str
 
 class Message(BaseModel):
     data: str

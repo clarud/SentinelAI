@@ -19,6 +19,9 @@ SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
     "openid",
+    "https://www.googleapis.com/auth/drive.readonly",         # View Drive files
+    "https://www.googleapis.com/auth/drive.file",            # Create/edit Drive files
+    "https://www.googleapis.com/auth/drive.metadata.readonly", # View file metadata
 ]
 
 client_secret_path = os.getenv('GOOGLE_CLIENT_SECRET_PATH')

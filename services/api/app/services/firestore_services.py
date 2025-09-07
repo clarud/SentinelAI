@@ -50,13 +50,12 @@ def get_watch_expiration(user_id: str) -> int:
     doc = db.collection(COLLECTION).document(user_id).get()
     if doc.exists:
         expiration = doc.to_dict().get('watch_expiration', 0)
-        # Ensure we return an integer
         if isinstance(expiration, str):
             try:
                 return int(expiration)
             except ValueError:
                 return 0
-        return int(expiration) if expiration else 0
+        return expiration
     return 0
 
 def delete_tokens(user_id: str):
@@ -83,14 +82,48 @@ def store_email(user_id: str, email_data: email.EmailData):
 def get_all_watching_users() -> list:
     """Get all users who have active Gmail watches"""
     users = []
-    now = int(time.time())
+    now = int(time.time() * 1000)  # Use milliseconds to match watch expiration format
     docs = db.collection(COLLECTION).stream()
     
     for doc in docs:
         data = doc.to_dict()
         # If watch_expiration exists and is in the future
-        if data.get('watch_expiration', 0) > now:
+        watch_expiration = data.get('watch_expiration', 0)
+        
+        # Convert to int if it's stored as string
+        if isinstance(watch_expiration, str):
+            try:
+                watch_expiration = int(watch_expiration)
+            except ValueError:
+                continue  # Skip if can't convert
+        
+        if watch_expiration > now:
             users.append(doc.id)
     
     return users
 
+DRIVE_FILES_COLLECTION = "drive_files"
+
+def store_drive_file_link(user_id: str, file_data: dict):
+    """Store Google Drive file link in Firestore"""
+    file_data['uploaded_at'] = datetime.now()
+    db.collection(DRIVE_FILES_COLLECTION).document(user_id).collection('files').document(file_data['file_id']).set(file_data, merge=True)
+
+def get_drive_files(user_id: str, limit: int = 50):
+    """Retrieve user's Drive files from Firestore"""
+    files_ref = db.collection(DRIVE_FILES_COLLECTION).document(user_id).collection('files')
+    docs = files_ref.order_by('uploaded_at', direction=firestore.Query.DESCENDING).limit(limit).stream()
+    
+    files = []
+    for doc in docs:
+        file_data = doc.to_dict()
+        files.append(file_data)
+    
+    return files
+
+def get_drive_file(user_id: str, file_id: str):
+    """Get specific Drive file by file ID"""
+    doc = db.collection(DRIVE_FILES_COLLECTION).document(user_id).collection('files').document(file_id).get()
+    if doc.exists:
+        return doc.to_dict()
+    return None
