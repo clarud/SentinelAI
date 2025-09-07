@@ -8,6 +8,8 @@ import websockets
 
 # Add the MCP directory to Python path to find the tool modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
+repo_root = os.path.dirname(current_dir)
+sys.path.insert(0, repo_root)
 sys.path.insert(0, current_dir)
 
 # Import all tools from different modules using correct paths
@@ -21,8 +23,9 @@ from tools.process_pdf import process_pdf
 from tools.extract_link import extract_link
 from tools.extract_number import extract_number
 from tools.extract_organisation import extract_organisation
-from tools.classify_email import classify_email
-from tools.send_report_to_drive import send_report_to_drive
+from tools.gmail_tools import mark_as_scam
+from tools.google_drive_tool import create_and_upload_analysis_pdf
+from tools.firestore_tools import store_analysis_data
 from tools.call_rag import call_rag
 from tools.store_rag import store_rag
 
@@ -40,8 +43,14 @@ TOOLS = {
     "extraction-tools.extract_organisation": lambda args: extract_organisation(args["text"]),
     
     # Gmail tools
-    "gmail-tools.classify_email": lambda args: classify_email(args["email_data"]),
-    "gmail-tools.send_report_to_drive": lambda args: send_report_to_drive(args["report_data"]),
+    "gmail-tools.mark_as_scam": lambda args: mark_as_scam(args["user_email"], args["message_id"]),
+    "gmail-tools.create_analysis_pdf": lambda args: create_and_upload_analysis_pdf(
+        args["user_email"], 
+        args["message_id"], 
+        args["analysis_data"], 
+        args.get("title", "Email Fraud Analysis")
+    ),
+    "gmail-tools.store_analysis_data": lambda args: store_analysis_data(args["data"]),
     
     # RAG tools
     "rag-tools.call_rag": lambda args: call_rag(args["document"]),
