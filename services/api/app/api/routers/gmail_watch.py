@@ -8,7 +8,6 @@ from fastapi.responses import JSONResponse
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
 from app.services.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration, get_all_watching_users
-from app.api.routers.gmail_oauth import get_gmail_service
 from app.services.celery_client import celery
 from app.schema import email
 
