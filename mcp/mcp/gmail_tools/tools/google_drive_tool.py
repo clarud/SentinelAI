@@ -1,5 +1,5 @@
 import io
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleRequest
 from googleapiclient.discovery import build
