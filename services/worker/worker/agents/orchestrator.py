@@ -253,7 +253,7 @@ def assess_document(document: Any) -> Dict[str, Any]:
                 "extraction-tools.extract_organisation"
             ])
             _execute_calls(opt_calls, evidence, errors, t0)
-            
+            logger.logger.info(f"PLANNER TOOLS EXECUTED: {opt_calls}")
             for ev in evidence:
                 if ev.get("tool", "").startswith("extraction-tools."):
                     logger.logger.info(f"EXTRACTION TOOL RESULT - {ev.get('tool', 'unknown')}: {ev.get('output', 'No output')}")

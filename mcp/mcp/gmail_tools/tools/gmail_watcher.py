@@ -4,7 +4,7 @@ import base64
 from fastapi import APIRouter
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
-from firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration
+from mcp.gmail_tools.tools.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ class GmailWatcher:
                 'access_token': credentials.token,
                 'expiry': credentials.expiry.isoformat() if credentials.expiry else None
             })
-            from firestore_services import store_tokens
+            from mcp.gmail_tools.tools.firestore_services import store_tokens
             store_tokens(self.user_email, token_data)
         
         self.service = build("gmail", "v1", credentials=credentials)

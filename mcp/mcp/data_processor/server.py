@@ -4,8 +4,8 @@ import os
 import json
 import asyncio
 import websockets
-from tools.process_email import process_email
-from tools.process_pdf import process_pdf
+from mcp.data_processor.tools.process_email import process_email
+from mcp.data_processor.tools.process_pdf import process_pdf
 
 PORT = int(os.getenv("PORT", "7032"))
 

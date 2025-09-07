@@ -10,18 +10,18 @@ import sys
 services_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'services'))
 sys.path.append(services_path)
 
-from tools.gmail_tools import modify_labels, mark_as_scam
-from tools.google_drive_tool import create_and_upload_analysis_pdf
-from tools.classify_email import classify_email
-from tools.send_report_to_drive import send_report_to_drive
+from mcp.gmail_tools.tools.gmail_tools import modify_labels, mark_as_scam
+from mcp.gmail_tools.tools.google_drive_tool import create_and_upload_analysis_pdf
+from mcp.gmail_tools.tools.classify_email import classify_email
+from mcp.gmail_tools.tools.send_report_to_drive import send_report_to_drive
 
 PORT = int(os.getenv("PORT", "7034"))
 
 TOOLS = {
     "classify_email": lambda args: classify_email(args["email_data"]),
     "send_report_to_drive": lambda args: send_report_to_drive(args["report_data"]),
-    "gmail.markAsScam": lambda args: mark_as_scam(args["user_email"], args["message_id"]),
-    "gmail.modifyLabels": lambda args: modify_labels(args["user_email"], args["message_id"], args.get("add_labels"), args.get("remove_labels")),
+    "mark_as_scam": lambda args: mark_as_scam(args["user_email"], args["message_id"]),
+    "modify_labels": lambda args: modify_labels(args["user_email"], args["message_id"], args.get("add_labels"), args.get("remove_labels")),
     "drive.uploadAnalysis": lambda args: create_and_upload_analysis_pdf(
         args["user_email"], 
         args["message_id"], 

@@ -1,4 +1,4 @@
-from gmail_watcher import GmailWatcher
+from mcp.gmail_tools.tools.gmail_watcher import GmailWatcher
 
 def get_or_create_scam_label(service):
     """
