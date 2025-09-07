@@ -1,5 +1,8 @@
 from google.cloud import firestore
 from typing import Dict
+from dotenv import load_dotenv
+
+load_dotenv()
 
 db = firestore.Client()
 
