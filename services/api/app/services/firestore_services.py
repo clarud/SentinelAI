@@ -78,6 +78,7 @@ def get_start_history_id(user_id: str) -> str:
 def store_email(user_id: str, email_data: email.EmailData):
     """Store an email in Firestore under a subcollection 'emails'"""
     db.collection(COLLECTION).document(user_id).collection('emails').document(email_data.id).set(email_data.model_dump())
+    print("Successfully stored email")
     
 def get_all_watching_users() -> list:
     """Get all users who have active Gmail watches"""
