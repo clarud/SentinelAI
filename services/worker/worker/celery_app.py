@@ -10,7 +10,7 @@ celery = Celery(
     "sentinel_ai",
     broker=BROKER_URL,
     backend=RESULT_BACKEND, 
-    include=["worker.tasks.email_task"]
+    include=["worker.worker.tasks.email_task"]
 )
 
 celery.conf.update(

@@ -1,0 +1,272 @@
+{
+  "workflow_id": "5ef8212d",
+  "start_time": 1757197987.4852748,
+  "start_timestamp": "2025-09-07T06:33:07.486278",
+  "steps": [
+    {
+      "step_id": 1,
+      "step_name": "document_processing",
+      "description": "Process document and extract text content",
+      "start_time": 1757197987.6093438,
+      "start_timestamp": "2025-09-07T06:33:07.609343",
+      "end_time": 1757197987.6173418,
+      "end_timestamp": "2025-09-07T06:33:07.617341",
+      "duration": 0.007997989654541016,
+      "metadata": {
+        "processed_length": 580
+      }
+    },
+    {
+      "step_id": 2,
+      "step_name": "rag_analysis",
+      "description": "Retrieve similar documents from database",
+      "start_time": 1757197987.618342,
+      "start_timestamp": "2025-09-07T06:33:07.618342",
+      "end_time": 1757197991.7060428,
+      "end_timestamp": "2025-09-07T06:33:11.706043",
+      "duration": 4.087700843811035,
+      "metadata": {
+        "tools_executed": 1,
+        "budget_remaining": 5
+      }
+    },
+    {
+      "step_id": 3,
+      "step_name": "router_decision",
+      "description": "ROUTER agent decides workflow path",
+      "start_time": 1757197991.7060428,
+      "start_timestamp": "2025-09-07T06:33:11.706043",
+      "end_time": 1757197994.207466,
+      "end_timestamp": "2025-09-07T06:33:14.207466",
+      "duration": 2.5014231204986572,
+      "metadata": {
+        "route": "full_analysis",
+        "agents_planned": 4
+      }
+    },
+    {
+      "step_id": 4,
+      "step_name": "analyst_agent",
+      "description": "ANALYST agent analyzes evidence",
+      "start_time": 1757197994.207466,
+      "start_timestamp": "2025-09-07T06:33:14.207466",
+      "end_time": 1757197998.0600362,
+      "end_timestamp": "2025-09-07T06:33:18.060036",
+      "duration": 3.8525702953338623,
+      "metadata": {
+        "analysis_generated": true
+      }
+    },
+    {
+      "step_id": 5,
+      "step_name": "supervisor_agent",
+      "description": "SUPERVISOR agent makes final decision",
+      "start_time": 1757197998.0600362,
+      "start_timestamp": "2025-09-07T06:33:18.060036",
+      "end_time": 1757198001.0151262,
+      "end_timestamp": "2025-09-07T06:33:21.015126",
+      "duration": 2.955090045928955,
+      "metadata": {
+        "validation": "success"
+      }
+    },
+    {
+      "step_id": 6,
+      "step_name": "executer_agent",
+      "description": "EXECUTER agent performs final actions",
+      "start_time": 1757198001.0151262,
+      "start_timestamp": "2025-09-07T06:33:21.015126",
+      "end_time": 1757198005.1158473,
+      "end_timestamp": "2025-09-07T06:33:25.115847",
+      "duration": 4.100721120834351,
+      "metadata": {
+        "executer_steps": 1
+      }
+    },
+    {
+      "step_id": 7,
+      "step_name": "completion",
+      "description": "Finalize assessment and prepare response",
+      "start_time": 1757198005.1158473,
+      "start_timestamp": "2025-09-07T06:33:25.115847"
+    }
+  ],
+  "decisions": [],
+  "tool_calls": [
+    {
+      "server": "rag-tools",
+      "tool": "call_rag",
+      "args": {
+        "document": "\ud83d\ude80 AGENTIC ORCHESTRATOR TEST Testing the new ROUTER-based dynamic workflow ============================================================ \ud83e\uddea Testing Agentic Workflow with Suspicious Email ============================================================ Document: URGENT: Verify Your Account NOW or Face Suspension from security@amazon-verification.com Body preview: Dear Customer, We have detected unusual activity on your Amazon account. To prevent unauthorized access, we need you to verify your identity immediately. Click here to verify: http://amazon... \ud83e\udd16 Running agentic workflow..."
+      },
+      "timestamp": "2025-09-07T06:33:11.704977",
+      "success": false,
+      "error": "[WinError 1225] The remote computer refused the network connection"
+    },
+    {
+      "server": "rag-tools",
+      "tool": "store_rag",
+      "args": {
+        "output": {
+          "is_scam": "scam",
+          "confidence_level": 0.9,
+          "scam_probability": 95.0,
+          "explanation": "The high scam probability of 0.95 and confidence level of 0.9, along with the tool outputs indicating suspicious urgency tactics, spoofed sender address, and malicious links, strongly suggest this email is a phishing scam attempting to steal sensitive information. Proceeding with caution is highly recommended.",
+          "text": "\ud83d\ude80 AGENTIC ORCHESTRATOR TEST Testing the new ROUTER-based dynamic workflow ============================================================ \ud83e\uddea Testing Agentic Workflow with Suspicious Email ============================================================ Document: URGENT: Verify Your Account NOW or Face Suspension from security@amazon-verification.com Body preview: Dear Customer, We have detected unusual activity on your Amazon account. To prevent unauthorized access, we need you to verify your identity immediately. Click here to verify: http://amazon... \ud83e\udd16 Running agentic workflow...",
+          "email": null,
+          "tool_evidence": [],
+          "tool_errors": [
+            {
+              "tool": "rag-tools.call_rag",
+              "error": "[WinError 1225] The remote computer refused the network connection"
+            },
+            {
+              "tool": "rag-tools.store_rag",
+              "error": "[WinError 1225] The remote computer refused the network connection"
+            }
+          ]
+        }
+      },
+      "timestamp": "2025-09-07T06:33:25.114707",
+      "success": false,
+      "error": "[WinError 1225] The remote computer refused the network connection"
+    }
+  ],
+  "performance_metrics": {
+    "input_document_length": {
+      "value": 580,
+      "unit": "characters",
+      "timestamp": "2025-09-07T06:33:07.608342"
+    },
+    "processed_document_length": {
+      "value": 580,
+      "unit": "characters",
+      "timestamp": "2025-09-07T06:33:07.617341"
+    },
+    "tool_rag-tools_call_rag_duration": {
+      "value": 4.0856311321258545,
+      "unit": "seconds",
+      "timestamp": "2025-09-07T06:33:11.704977"
+    },
+    "tool_rag-tools_store_rag_duration": {
+      "value": 4.090956687927246,
+      "unit": "seconds",
+      "timestamp": "2025-09-07T06:33:25.114707"
+    }
+  },
+  "errors": [],
+  "final_result": {
+    "is_scam": "scam",
+    "confidence_level": 0.9,
+    "scam_probability": 95.0,
+    "explanation": "The high scam probability of 0.95 and confidence level of 0.9, along with the tool outputs indicating suspicious urgency tactics, spoofed sender address, and malicious links, strongly suggest this email is a phishing scam attempting to steal sensitive information. Proceeding with caution is highly recommended.",
+    "text": "\ud83d\ude80 AGENTIC ORCHESTRATOR TEST Testing the new ROUTER-based dynamic workflow ============================================================ \ud83e\uddea Testing Agentic Workflow with Suspicious Email ============================================================ Document: URGENT: Verify Your Account NOW or Face Suspension from security@amazon-verification.com Body preview: Dear Customer, We have detected unusual activity on your Amazon account. To prevent unauthorized access, we need you to verify your identity immediately. Click here to verify: http://amazon... \ud83e\udd16 Running agentic workflow...",
+    "email": null,
+    "tool_evidence": [],
+    "tool_errors": [
+      {
+        "tool": "rag-tools.call_rag",
+        "error": "[WinError 1225] The remote computer refused the network connection"
+      },
+      {
+        "tool": "rag-tools.store_rag",
+        "error": "[WinError 1225] The remote computer refused the network connection"
+      }
+    ]
+  },
+  "document_info": {
+    "type": "str",
+    "length": 580
+  },
+  "extra_data": [
+    {
+      "router_decision": {
+        "route": "full_analysis",
+        "reasoning": "The confidence level of 0.5 and scam probability of 50% indicate moderate uncertainty, so a full analysis pipeline is recommended.",
+        "agents_to_call": [
+          "PLANNER",
+          "ANALYST",
+          "SUPERVISOR",
+          "EXECUTER"
+        ],
+        "final_classification": null,
+        "skip_to_execution": false
+      }
+    },
+    {
+      "analyst_result": {
+        "scam_probability": 0.95,
+        "confidence_level": 0.9,
+        "tool_outputs": {
+          "extract_text": "URGENT: Verify Your Account NOW or Face Suspension from security@amazon-verification.com Body preview: Dear Customer, We have detected unusual activity on your Amazon account. To prevent unauthorized access, we need you to verify your identity immediately. Click here to verify: http://amazon...",
+          "rag": "This email appears to be a phishing scam attempting to trick the recipient into clicking a malicious link and potentially revealing sensitive information. The urgency and threat of account suspension are common scare tactics used by scammers. The sender's email address is also suspicious, spoofing Amazon's domain. I would not recommend clicking the link or taking any action based on this email."
+        }
+      }
+    },
+    {
+      "supervisor_result": {
+        "is_scam": "scam",
+        "confidence_level": 0.9,
+        "scam_probability": 95.0,
+        "explanation": "The high scam probability of 0.95 and confidence level of 0.9, along with the tool outputs indicating suspicious urgency tactics, spoofed sender address, and malicious links, strongly suggest this email is a phishing scam attempting to steal sensitive information. Proceeding with caution is highly recommended.",
+        "text": "\ud83d\ude80 AGENTIC ORCHESTRATOR TEST Testing the new ROUTER-based dynamic workflow ============================================================ \ud83e\uddea Testing Agentic Workflow with Suspicious Email ============================================================ Document: URGENT: Verify Your Account NOW or Face Suspension from security@amazon-verification.com Body preview: Dear Customer, We have detected unusual activity on your Amazon account. To prevent unauthorized access, we need you to verify your identity immediately. Click here to verify: http://amazon... \ud83e\udd16 Running agentic workflow..."
+      }
+    },
+    {
+      "executer_tools": {
+        "steps": [
+          {
+            "server": "rag-tools",
+            "tool": "store_rag",
+            "args": {
+              "output": {
+                "is_scam": "scam",
+                "confidence_level": 0.9,
+                "scam_probability": 95.0,
+                "explanation": "The high scam probability of 0.95 and confidence level of 0.9, along with the tool outputs indicating suspicious urgency tactics, spoofed sender address, and malicious links, strongly suggest this email is a phishing scam attempting to steal sensitive information. Proceeding with caution is highly recommended.",
+                "text": "\ud83d\ude80 AGENTIC ORCHESTRATOR TEST Testing the new ROUTER-based dynamic workflow ============================================================ \ud83e\uddea Testing Agentic Workflow with Suspicious Email ============================================================ Document: URGENT: Verify Your Account NOW or Face Suspension from security@amazon-verification.com Body preview: Dear Customer, We have detected unusual activity on your Amazon account. To prevent unauthorized access, we need you to verify your identity immediately. Click here to verify: http://amazon... \ud83e\udd16 Running agentic workflow...",
+                "email": null,
+                "tool_evidence": [],
+                "tool_errors": [
+                  {
+                    "tool": "rag-tools.call_rag",
+                    "error": "[WinError 1225] The remote computer refused the network connection"
+                  },
+                  {
+                    "tool": "rag-tools.store_rag",
+                    "error": "[WinError 1225] The remote computer refused the network connection"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "count": 1
+      }
+    },
+    {
+      "executer_results": {
+        "evidence_count": 0,
+        "error_count": 2,
+        "evidence": [],
+        "errors": [
+          {
+            "tool": "rag-tools.call_rag",
+            "error": "[WinError 1225] The remote computer refused the network connection"
+          },
+          {
+            "tool": "rag-tools.store_rag",
+            "error": "[WinError 1225] The remote computer refused the network connection"
+          }
+        ]
+      }
+    }
+  ],
+  "document_id": "unknown",
+  "end_time": 1757198005.1158473,
+  "end_timestamp": "2025-09-07T06:33:25.115847",
+  "total_processing_time": 17.506503582000732,
+  "evidence_count": 0,
+  "error_count": 2,
+  "workflow_duration": 17.63057255744934
+}
