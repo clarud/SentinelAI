@@ -1,4 +1,4 @@
-from tools.gmail_watcher import GmailWatcher
+from gmail_watcher import GmailWatcher
 
 def get_or_create_scam_label(service):
     """
@@ -25,7 +25,7 @@ def get_or_create_scam_label(service):
             'labelListVisibility': 'labelShow',
             'color': {
                 'textColor': '#ffffff',
-                'backgroundColor': '#ff0000'  # Red background for scam
+                'backgroundColor': '#000000'  # Red background for scam
             }
         }
         

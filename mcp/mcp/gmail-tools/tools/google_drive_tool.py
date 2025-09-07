@@ -12,6 +12,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Firestore setup
 db = firestore.Client()

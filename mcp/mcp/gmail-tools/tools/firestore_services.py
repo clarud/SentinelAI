@@ -1,7 +1,7 @@
 from google.cloud import firestore
 from google.oauth2.credentials import Credentials
 from datetime import datetime
-from tools.email_schema import EmailData
+from email_schema import EmailData
 import time
 from dotenv import load_dotenv
 load_dotenv()

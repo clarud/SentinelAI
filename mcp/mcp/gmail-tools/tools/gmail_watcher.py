@@ -4,7 +4,7 @@ import base64
 from fastapi import APIRouter
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request as GoogleRequest
-from tools.firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration
+from firestore_services import get_tokens, create_credentials_from_dict, update_watch_expiration
 
 router = APIRouter()
 
