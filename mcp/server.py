@@ -8,15 +8,16 @@ import websockets
 
 # Add the MCP directory to Python path to find the tool modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
+mcp_dir = os.path.join(current_dir, 'mcp')
 repo_root = os.path.dirname(current_dir)
 sys.path.insert(0, repo_root)
 sys.path.insert(0, current_dir)
 
 # Import all tools from different modules using correct paths
-sys.path.insert(0, os.path.join(current_dir, 'data-processor'))
-sys.path.insert(0, os.path.join(current_dir, 'extraction-tools'))
-sys.path.insert(0, os.path.join(current_dir, 'gmail-tools'))
-sys.path.insert(0, os.path.join(current_dir, 'rag-tools'))
+sys.path.insert(0, os.path.join(mcp_dir, 'data-processor'))
+sys.path.insert(0, os.path.join(mcp_dir, 'extraction-tools'))
+sys.path.insert(0, os.path.join(mcp_dir, 'gmail-tools'))
+sys.path.insert(0, os.path.join(mcp_dir, 'rag-tools'))
 
 from tools.process_email import process_email
 from tools.process_pdf import process_pdf
