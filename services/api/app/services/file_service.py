@@ -7,7 +7,7 @@ import time
 
 # -------- Function to extract text from PIL Image object --------
 def extract_text_from_image_object(image_obj: Image.Image):
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
     return pytesseract.image_to_string(image_obj)
 
 # -------- Function to extract text from PDF bytes --------
