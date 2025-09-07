@@ -24,8 +24,8 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
       // Fetch emails immediately when listening starts
       fetchEmails();
       
-      // Set up interval to fetch emails every minute
-      interval = setInterval(fetchEmails, 60000);
+      // Set up interval to fetch emails every 10 seconds
+      interval = setInterval(fetchEmails, 30000);
     }
 
     return () => {
