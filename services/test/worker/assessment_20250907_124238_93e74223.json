@@ -1,0 +1,265 @@
+{
+  "workflow_id": "93e74223",
+  "start_time": 1757220158.3694701,
+  "start_timestamp": "2025-09-07T12:42:38.370471",
+  "steps": [
+    {
+      "step_id": 1,
+      "step_name": "document_processing",
+      "description": "Process document and extract text content",
+      "start_time": 1757220158.3724713,
+      "start_timestamp": "2025-09-07T12:42:38.372471",
+      "end_time": 1757220158.3734727,
+      "end_timestamp": "2025-09-07T12:42:38.373472",
+      "duration": 0.0010013580322265625,
+      "metadata": {
+        "processed_length": 2860
+      }
+    },
+    {
+      "step_id": 2,
+      "step_name": "rag_analysis",
+      "description": "Retrieve similar documents from database",
+      "start_time": 1757220158.3748128,
+      "start_timestamp": "2025-09-07T12:42:38.374812",
+      "end_time": 1757220162.484079,
+      "end_timestamp": "2025-09-07T12:42:42.484078",
+      "duration": 4.109266042709351,
+      "metadata": {
+        "tools_executed": 1,
+        "budget_remaining": 5
+      }
+    },
+    {
+      "step_id": 3,
+      "step_name": "router_decision",
+      "description": "ROUTER agent decides workflow path",
+      "start_time": 1757220162.4850793,
+      "start_timestamp": "2025-09-07T12:42:42.485079",
+      "end_time": 1757220166.1376762,
+      "end_timestamp": "2025-09-07T12:42:46.137676",
+      "duration": 3.652596950531006,
+      "metadata": {
+        "route": "full_analysis",
+        "agents_planned": 4
+      }
+    },
+    {
+      "step_id": 4,
+      "step_name": "analyst_agent",
+      "description": "ANALYST agent analyzes evidence",
+      "start_time": 1757220166.138677,
+      "start_timestamp": "2025-09-07T12:42:46.138677",
+      "end_time": 1757220182.0867903,
+      "end_timestamp": "2025-09-07T12:43:02.086790",
+      "duration": 15.948113441467285,
+      "metadata": {
+        "analysis_generated": false
+      }
+    },
+    {
+      "step_id": 5,
+      "step_name": "supervisor_agent",
+      "description": "SUPERVISOR agent makes final decision",
+      "start_time": 1757220182.0867903,
+      "start_timestamp": "2025-09-07T12:43:02.086790",
+      "end_time": 1757220186.4093344,
+      "end_timestamp": "2025-09-07T12:43:06.409334",
+      "duration": 4.322544097900391,
+      "metadata": {
+        "validation": "success"
+      }
+    },
+    {
+      "step_id": 6,
+      "step_name": "executer_agent",
+      "description": "EXECUTER agent performs final actions",
+      "start_time": 1757220186.4103315,
+      "start_timestamp": "2025-09-07T12:43:06.410331",
+      "end_time": 1757220190.4836102,
+      "end_timestamp": "2025-09-07T12:43:10.483610",
+      "duration": 4.0732786655426025,
+      "metadata": {
+        "executer_steps": 1
+      }
+    },
+    {
+      "step_id": 7,
+      "step_name": "completion",
+      "description": "Finalize assessment and prepare response",
+      "start_time": 1757220190.4836102,
+      "start_timestamp": "2025-09-07T12:43:10.483610"
+    }
+  ],
+  "decisions": [],
+  "tool_calls": [
+    {
+      "server": "rag-tools",
+      "tool": "call_rag",
+      "args": {
+        "document": "TAN JUN WEI CLARENCE\n\niW +65 8716 5060 <a clarencejw@gmail.com\n\nwwwi.linkedin.com/in/clarencetjw\n\nhttps://github.com/clarud NUS Y3 Computer Science\n\nStudent\n\nEDUCATION\n\nBachelor of Computing,\n\nComputer Science\n\nNational University of\nSingapore\n\n2023 - 2027\n\nGCE A\u2019LEVEL\n\nNanyang Junior College\n\n2019-2020\n\nGCE O'LEVEL\n\nNan Chiau High School\n2015-2018\n\nSKILLS\n\nProgramming Languages\n\ne Java, Python, C,\nJavaScript, TypeScript\n\nLANGUAGE\n\ne English (Fluent)\ne Chinese (Fluent)\n\n\u00a2 Malay (Elementary)\ne Spanish\n(Elementary)\n\nPROFILE\n\nComputer Science student at the National University of Singapore with an\ninterest in pursuing Software Development and Artificial Intelligence. I'm\nparticularly keen to deepen my knowledge in backend system design and\nenjoy tackling algorithms and problem-solving challenges in my free time. I'm\nalso exploring the broader field of Artificial Intelligence, including areas such\nas Machine Learning and Computer Vision, and am passionate about building\nreliable and efficient systems.\n\nEXPERIENCE\nFull Stack Software Development Intern June 2025 -\nAMD Singapore December 2025\n\nFastAPI - Vue.js - React - Kubernetes - Docker - Prompt Engineering - LLM - Software Architecture\n\n\u00a2 Developing full-stack solutions using frameworks, integrating data pipelines and LLM APIs.\n\u00a2 Collaborated across teams to design, implement, and refine backend systems, gaining\nhands-on experience with REST APIs and deployment strategies.\n\nPROJECTS / PERSONAL\n\nSnapify - Photobooth Web Application\nNext.js - React - RESTful API Calls - TypeScript\nDeveloper\n\nFebruary 2025\n\n\u00a2 Developed a full-stack photobooth application using Next.js, React, and Tailwind CSS that\ncaptures webcam images and processes them via external APIs.\n\n\u00a2 Integrated secure image uploads using Cloudinary API and leveraged the Pixelixe API to\nconvert photos into stylized (sepia) images.\n\n\u00a2 Designed a photostrip feature that composes multiple images into a single downloadable\nimage using HTML Canvas.\n\nTravelPals (Current) - Travel Planning Social Media\nVite - React - Node,js - Express - Supabase - TypeScript\n\nMay 2025 -\nPresent\n\nDeveloper\n\n\u00a2 Responsible for designing and implementing the backend architecture and core services.\n\n\u00a2 Developing a scalable trip planning platform with a microservices architecture using Node js,\nExpress, TypeScript, and Supabase.\n\n\u00a2 MVP focuses on personal trip planning, with a roadmap to add social sharing and\ncollaboration features.\n\nWardWatch - Patient management application 2024\nJavaFX - FXML - Java 17 - Command Pattern - MVC Architecture - JUnit -\n\nManual Testing - Logging\nDeveloper\n\n\u00a2 Developed a command-line interface for doctors to efficiently manage patient records.\n\u00a2 Collaborated in an agile team, utilizing Git for version control, JUnit for testing, and MarkBind\nfor documentation, ensuring code quality and maintainability.\n\n"
+      },
+      "timestamp": "2025-09-07T12:42:42.482080",
+      "success": false,
+      "error": "[WinError 1225] The remote computer refused the network connection"
+    },
+    {
+      "server": "rag-tools",
+      "tool": "store_rag",
+      "args": {
+        "output": {
+          "is_scam": "not_scam",
+          "confidence_level": 0.95,
+          "scam_probability": 5.0,
+          "explanation": "The provided content appears to be a standard resume or curriculum vitae with details about the person's education, skills, and programming languages known. There are no obvious signs of scam or malicious intent detected.",
+          "text": "TAN JUN WEI CLARENCE\n\niW +65 8716 5060 <a clarencejw@gmail.com\n\nwwwi.linkedin.com/in/clarencetjw\n\nhttps://github.com/clarud NUS Y3 Computer Science\n\nStudent\n\nEDUCATION\n\nBachelor of Computing,\n\nComputer Science\n\nNational University of\nSingapore\n\n2023 - 2027\n\nGCE A\u2019LEVEL\n\nNanyang Junior College\n\n2019-2020\n\nGCE O'LEVEL\n\nNan Chiau High School\n2015-2018\n\nSKILLS\n\nProgramming Languages\n\ne Java, Python, C,\nJavaScript, TypeScript\n\nLANGUAGE\n\ne English (Fluent)\ne Chinese (Fluent)\n\n\u00a2 Malay (Elementary)\ne Spanish\n(Elementary)\n\nPROFILE\n\nComputer Science student at the National University of Singapore with an\ninterest in pursuing Software Development and Artificial Intelligence. I'm\nparticularly keen to deepen my knowledge in backend system design and\nenjoy tackling algorithms and problem-solving challenges in my free time. I'm\nalso exploring the broader field of Artificial Intelligence, including areas such\nas Machine Learning and Computer Vision, and am passionate about building\nreliable and efficient systems.\n\nEXPERIENCE\nFull Stack Software Development Intern June 2025 -\nAMD Singapore December 2025\n\nFastAPI - Vue.js - React - Kubernetes - Docker - Prompt Engineering - LLM - Software Architecture\n\n\u00a2 Developing full-stack solutions using frameworks, integrating data pipelines and LLM APIs.\n\u00a2 Collaborated across teams to design, implement, and refine backend systems, gaining\nhands-on experience with REST APIs and deployment strategies.\n\nPROJECTS / PERSONAL\n\nSnapify - Photobooth Web Application\nNext.js - React - RESTful API Calls - TypeScript\nDeveloper\n\nFebruary 2025\n\n\u00a2 Developed a full-stack photobooth application using Next.js, React, and Tailwind CSS that\ncaptures webcam images and processes them via external APIs.\n\n\u00a2 Integrated secure image uploads using Cloudinary API and leveraged the Pixelixe API to\nconvert photos into stylized (sepia) images.\n\n\u00a2 Designed a photostrip feature that composes multiple images into a single downloadable\nimage using HTML Canvas.\n\nTravelPals (Current) - Travel Planning Social Media\nVite - React - Node,js - Express - Supabase - TypeScript\n\nMay 2025 -\nPresent\n\nDeveloper\n\n\u00a2 Responsible for designing and implementing the backend architecture and core services.\n\n\u00a2 Developing a scalable trip planning platform with a microservices architecture using Node js,\nExpress, TypeScript, and Supabase.\n\n\u00a2 MVP focuses on personal trip planning, with a roadmap to add social sharing and\ncollaboration features.\n\nWardWatch - Patient management application 2024\nJavaFX - FXML - Java 17 - Command Pattern - MVC Architecture - JUnit -\n\nManual Testing - Logging\nDeveloper\n\n\u00a2 Developed a command-line interface for doctors to efficiently manage patient records.\n\u00a2 Collaborated in an agile team, utilizing Git for version control, JUnit for testing, and MarkBind\nfor documentation, ensuring code quality and maintainability.\n\n",
+          "email": null,
+          "tool_evidence": [],
+          "tool_errors": [
+            {
+              "tool": "rag-tools.call_rag",
+              "error": "[WinError 1225] The remote computer refused the network connection"
+            },
+            {
+              "tool": "rag-tools.store_rag",
+              "error": "[WinError 1225] The remote computer refused the network connection"
+            }
+          ]
+        }
+      },
+      "timestamp": "2025-09-07T12:43:10.482102",
+      "success": false,
+      "error": "[WinError 1225] The remote computer refused the network connection"
+    }
+  ],
+  "performance_metrics": {
+    "input_document_length": {
+      "value": 2860,
+      "unit": "characters",
+      "timestamp": "2025-09-07T12:42:38.372471"
+    },
+    "processed_document_length": {
+      "value": 2860,
+      "unit": "characters",
+      "timestamp": "2025-09-07T12:42:38.373472"
+    },
+    "tool_rag-tools_call_rag_duration": {
+      "value": 4.107267379760742,
+      "unit": "seconds",
+      "timestamp": "2025-09-07T12:42:42.483083"
+    },
+    "tool_rag-tools_store_rag_duration": {
+      "value": 4.070770025253296,
+      "unit": "seconds",
+      "timestamp": "2025-09-07T12:43:10.482102"
+    }
+  },
+  "errors": [],
+  "final_result": {
+    "is_scam": "not_scam",
+    "confidence_level": 0.95,
+    "scam_probability": 5.0,
+    "explanation": "The provided content appears to be a standard resume or curriculum vitae with details about the person's education, skills, and programming languages known. There are no obvious signs of scam or malicious intent detected.",
+    "text": "TAN JUN WEI CLARENCE\n\niW +65 8716 5060 <a clarencejw@gmail.com\n\nwwwi.linkedin.com/in/clarencetjw\n\nhttps://github.com/clarud NUS Y3 Computer Science\n\nStudent\n\nEDUCATION\n\nBachelor of Computing,\n\nComputer Science\n\nNational University of\nSingapore\n\n2023 - 2027\n\nGCE A\u2019LEVEL\n\nNanyang Junior College\n\n2019-2020\n\nGCE O'LEVEL\n\nNan Chiau High School\n2015-2018\n\nSKILLS\n\nProgramming Languages\n\ne Java, Python, C,\nJavaScript, TypeScript\n\nLANGUAGE\n\ne English (Fluent)\ne Chinese (Fluent)\n\n\u00a2 Malay (Elementary)\ne Spanish\n(Elementary)\n\nPROFILE\n\nComputer Science student at the National University of Singapore with an\ninterest in pursuing Software Development and Artificial Intelligence. I'm\nparticularly keen to deepen my knowledge in backend system design and\nenjoy tackling algorithms and problem-solving challenges in my free time. I'm\nalso exploring the broader field of Artificial Intelligence, including areas such\nas Machine Learning and Computer Vision, and am passionate about building\nreliable and efficient systems.\n\nEXPERIENCE\nFull Stack Software Development Intern June 2025 -\nAMD Singapore December 2025\n\nFastAPI - Vue.js - React - Kubernetes - Docker - Prompt Engineering - LLM - Software Architecture\n\n\u00a2 Developing full-stack solutions using frameworks, integrating data pipelines and LLM APIs.\n\u00a2 Collaborated across teams to design, implement, and refine backend systems, gaining\nhands-on experience with REST APIs and deployment strategies.\n\nPROJECTS / PERSONAL\n\nSnapify - Photobooth Web Application\nNext.js - React - RESTful API Calls - TypeScript\nDeveloper\n\nFebruary 2025\n\n\u00a2 Developed a full-stack photobooth application using Next.js, React, and Tailwind CSS that\ncaptures webcam images and processes them via external APIs.\n\n\u00a2 Integrated secure image uploads using Cloudinary API and leveraged the Pixelixe API to\nconvert photos into stylized (sepia) images.\n\n\u00a2 Designed a photostrip feature that composes multiple images into a single downloadable\nimage using HTML Canvas.\n\nTravelPals (Current) - Travel Planning Social Media\nVite - React - Node,js - Express - Supabase - TypeScript\n\nMay 2025 -\nPresent\n\nDeveloper\n\n\u00a2 Responsible for designing and implementing the backend architecture and core services.\n\n\u00a2 Developing a scalable trip planning platform with a microservices architecture using Node js,\nExpress, TypeScript, and Supabase.\n\n\u00a2 MVP focuses on personal trip planning, with a roadmap to add social sharing and\ncollaboration features.\n\nWardWatch - Patient management application 2024\nJavaFX - FXML - Java 17 - Command Pattern - MVC Architecture - JUnit -\n\nManual Testing - Logging\nDeveloper\n\n\u00a2 Developed a command-line interface for doctors to efficiently manage patient records.\n\u00a2 Collaborated in an agile team, utilizing Git for version control, JUnit for testing, and MarkBind\nfor documentation, ensuring code quality and maintainability.\n\n",
+    "email": null,
+    "tool_evidence": [],
+    "tool_errors": [
+      {
+        "tool": "rag-tools.call_rag",
+        "error": "[WinError 1225] The remote computer refused the network connection"
+      },
+      {
+        "tool": "rag-tools.store_rag",
+        "error": "[WinError 1225] The remote computer refused the network connection"
+      }
+    ]
+  },
+  "document_info": {
+    "type": "str",
+    "length": 2860
+  },
+  "extra_data": [
+    {
+      "router_decision": {
+        "route": "full_analysis",
+        "reasoning": "The confidence level of 0.5 and scam probability of 50% indicate moderate uncertainty, so a full analysis pipeline is recommended.",
+        "agents_to_call": [
+          "PLANNER",
+          "ANALYST",
+          "SUPERVISOR",
+          "EXECUTER"
+        ],
+        "final_classification": null,
+        "skip_to_execution": false
+      }
+    },
+    {
+      "analyst_result": {}
+    },
+    {
+      "supervisor_result": {
+        "is_scam": "not_scam",
+        "confidence_level": 0.95,
+        "scam_probability": 5.0,
+        "explanation": "The provided content appears to be a standard resume or curriculum vitae with details about the person's education, skills, and programming languages known. There are no obvious signs of scam or malicious intent detected.",
+        "text": "TAN JUN WEI CLARENCE\n\niW +65 8716 5060 <a clarencejw@gmail.com\n\nwwwi.linkedin.com/in/clarencetjw\n\nhttps://github.com/clarud NUS Y3 Computer Science\n\nStudent\n\nEDUCATION\n\nBachelor of Computing,\n\nComputer Science\n\nNational University of\nSingapore\n\n2023 - 2027\n\nGCE A\u2019LEVEL\n\nNanyang Junior College\n\n2019-2020\n\nGCE O'LEVEL\n\nNan Chiau High School\n2015-2018\n\nSKILLS\n\nProgramming Languages\n\ne Java, Python, C,\nJavaScript, TypeScript\n\nLANGUAGE\n\ne English (Fluent)\ne Chinese (Fluent)\n\n\u00a2 Malay (Elementary)\ne Spanish\n(Elementary)\n\nPROFILE\n\nComputer Science student at the National University of Singapore with an\ninterest in pursuing Software Development and Artificial Intelligence. I'm\nparticularly keen to deepen my knowledge in backend system design and\nenjoy tackling algorithms and problem-solving challenges in my free time. I'm\nalso exploring the broader field of Artificial Intelligence, including areas such\nas Machine Learning and Computer Vision, and am passionate about building\nreliable and efficient systems.\n\nEXPERIENCE\nFull Stack Software Development Intern June 2025 -\nAMD Singapore December 2025\n\nFastAPI - Vue.js - React - Kubernetes - Docker - Prompt Engineering - LLM - Software Architecture\n\n\u00a2 Developing full-stack solutions using frameworks, integrating data pipelines and LLM APIs.\n\u00a2 Collaborated across teams to design, implement, and refine backend systems, gaining\nhands-on experience with REST APIs and deployment strategies.\n\nPROJECTS / PERSONAL\n\nSnapify - Photobooth Web Application\nNext.js - React - RESTful API Calls - TypeScript\nDeveloper\n\nFebruary 2025\n\n\u00a2 Developed a full-stack photobooth application using Next.js, React, and Tailwind CSS that\ncaptures webcam images and processes them via external APIs.\n\n\u00a2 Integrated secure image uploads using Cloudinary API and leveraged the Pixelixe API to\nconvert photos into stylized (sepia) images.\n\n\u00a2 Designed a photostrip feature that composes multiple images into a single downloadable\nimage using HTML Canvas.\n\nTravelPals (Current) - Travel Planning Social Media\nVite - React - Node,js - Express - Supabase - TypeScript\n\nMay 2025 -\nPresent\n\nDeveloper\n\n\u00a2 Responsible for designing and implementing the backend architecture and core services.\n\n\u00a2 Developing a scalable trip planning platform with a microservices architecture using Node js,\nExpress, TypeScript, and Supabase.\n\n\u00a2 MVP focuses on personal trip planning, with a roadmap to add social sharing and\ncollaboration features.\n\nWardWatch - Patient management application 2024\nJavaFX - FXML - Java 17 - Command Pattern - MVC Architecture - JUnit -\n\nManual Testing - Logging\nDeveloper\n\n\u00a2 Developed a command-line interface for doctors to efficiently manage patient records.\n\u00a2 Collaborated in an agile team, utilizing Git for version control, JUnit for testing, and MarkBind\nfor documentation, ensuring code quality and maintainability.\n\n"
+      }
+    },
+    {
+      "executer_tools": {
+        "steps": [
+          {
+            "server": "rag-tools",
+            "tool": "store_rag",
+            "args": {
+              "output": {
+                "is_scam": "not_scam",
+                "confidence_level": 0.95,
+                "scam_probability": 5.0,
+                "explanation": "The provided content appears to be a standard resume or curriculum vitae with details about the person's education, skills, and programming languages known. There are no obvious signs of scam or malicious intent detected.",
+                "text": "TAN JUN WEI CLARENCE\n\niW +65 8716 5060 <a clarencejw@gmail.com\n\nwwwi.linkedin.com/in/clarencetjw\n\nhttps://github.com/clarud NUS Y3 Computer Science\n\nStudent\n\nEDUCATION\n\nBachelor of Computing,\n\nComputer Science\n\nNational University of\nSingapore\n\n2023 - 2027\n\nGCE A\u2019LEVEL\n\nNanyang Junior College\n\n2019-2020\n\nGCE O'LEVEL\n\nNan Chiau High School\n2015-2018\n\nSKILLS\n\nProgramming Languages\n\ne Java, Python, C,\nJavaScript, TypeScript\n\nLANGUAGE\n\ne English (Fluent)\ne Chinese (Fluent)\n\n\u00a2 Malay (Elementary)\ne Spanish\n(Elementary)\n\nPROFILE\n\nComputer Science student at the National University of Singapore with an\ninterest in pursuing Software Development and Artificial Intelligence. I'm\nparticularly keen to deepen my knowledge in backend system design and\nenjoy tackling algorithms and problem-solving challenges in my free time. I'm\nalso exploring the broader field of Artificial Intelligence, including areas such\nas Machine Learning and Computer Vision, and am passionate about building\nreliable and efficient systems.\n\nEXPERIENCE\nFull Stack Software Development Intern June 2025 -\nAMD Singapore December 2025\n\nFastAPI - Vue.js - React - Kubernetes - Docker - Prompt Engineering - LLM - Software Architecture\n\n\u00a2 Developing full-stack solutions using frameworks, integrating data pipelines and LLM APIs.\n\u00a2 Collaborated across teams to design, implement, and refine backend systems, gaining\nhands-on experience with REST APIs and deployment strategies.\n\nPROJECTS / PERSONAL\n\nSnapify - Photobooth Web Application\nNext.js - React - RESTful API Calls - TypeScript\nDeveloper\n\nFebruary 2025\n\n\u00a2 Developed a full-stack photobooth application using Next.js, React, and Tailwind CSS that\ncaptures webcam images and processes them via external APIs.\n\n\u00a2 Integrated secure image uploads using Cloudinary API and leveraged the Pixelixe API to\nconvert photos into stylized (sepia) images.\n\n\u00a2 Designed a photostrip feature that composes multiple images into a single downloadable\nimage using HTML Canvas.\n\nTravelPals (Current) - Travel Planning Social Media\nVite - React - Node,js - Express - Supabase - TypeScript\n\nMay 2025 -\nPresent\n\nDeveloper\n\n\u00a2 Responsible for designing and implementing the backend architecture and core services.\n\n\u00a2 Developing a scalable trip planning platform with a microservices architecture using Node js,\nExpress, TypeScript, and Supabase.\n\n\u00a2 MVP focuses on personal trip planning, with a roadmap to add social sharing and\ncollaboration features.\n\nWardWatch - Patient management application 2024\nJavaFX - FXML - Java 17 - Command Pattern - MVC Architecture - JUnit -\n\nManual Testing - Logging\nDeveloper\n\n\u00a2 Developed a command-line interface for doctors to efficiently manage patient records.\n\u00a2 Collaborated in an agile team, utilizing Git for version control, JUnit for testing, and MarkBind\nfor documentation, ensuring code quality and maintainability.\n\n",
+                "email": null,
+                "tool_evidence": [],
+                "tool_errors": [
+                  {
+                    "tool": "rag-tools.call_rag",
+                    "error": "[WinError 1225] The remote computer refused the network connection"
+                  },
+                  {
+                    "tool": "rag-tools.store_rag",
+                    "error": "[WinError 1225] The remote computer refused the network connection"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "count": 1
+      }
+    },
+    {
+      "executer_results": {
+        "evidence_count": 0,
+        "error_count": 2,
+        "evidence": [],
+        "errors": [
+          {
+            "tool": "rag-tools.call_rag",
+            "error": "[WinError 1225] The remote computer refused the network connection"
+          },
+          {
+            "tool": "rag-tools.store_rag",
+            "error": "[WinError 1225] The remote computer refused the network connection"
+          }
+        ]
+      }
+    }
+  ],
+  "document_id": "unknown",
+  "end_time": 1757220190.484622,
+  "end_timestamp": "2025-09-07T12:43:10.484622",
+  "total_processing_time": 32.1121506690979,
+  "evidence_count": 0,
+  "error_count": 2,
+  "workflow_duration": 32.11515188217163
+}

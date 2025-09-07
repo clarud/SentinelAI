@@ -12,6 +12,7 @@ class EmailData(BaseModel):
     threadId: str
     body: str
     body_preview: str
+    email_address: str
 
 class Message(BaseModel):
     data: str
@@ -32,3 +33,6 @@ class NotificationResponse(BaseModel):
     processed_message_id: Optional[list[str]] = None
     email_data: Optional[EmailData] = None
     task_id: Optional[str] = None
+
+class StringRequest(BaseModel):
+    text: str

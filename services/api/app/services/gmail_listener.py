@@ -2,7 +2,7 @@ import base64
 import time
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from app.services.firestore_services import get_tokens  # You'll implement this
+from api.app.services.firestore_services import get_tokens  # You'll implement this
 import threading
 
 def fetch_and_process_emails(user_id):
