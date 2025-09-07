@@ -6,7 +6,7 @@ load_dotenv()
 
 db = firestore.Client()
 
-COLLECTION = "analysed_emails"
+COLLECTION = "gmail_tokens"
 
 def store_analysis_data(data: Dict):
     """
