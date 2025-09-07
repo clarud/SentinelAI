@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* SentinelAI Design System */
+    --primary-100: 200 81% 90%;      /* #d4eaf7 */
+    --primary-200: 200 33% 78%;      /* #b6ccd8 */
+    --primary-300: 180 3% 23%;       /* #3b3c3d */
+    --accent-100: 200 82% 69%;       /* #71c4ef */
+    --accent-200: 200 100% 27%;      /* #00668c */
+    --text-100: 0 3% 11%;            /* #1d1c1c */
+    --text-200: 200 17% 24%;         /* #313d44 */
+    --bg-100: 60 50% 99%;            /* #fffefb */
+    --bg-200: 50 23% 96%;            /* #f5f4f1 */
+    --bg-300: 50 5% 79%;             /* #cccbc8 */
+
+    /* Semantic tokens based on SentinelAI colors */
+    --background: var(--bg-100);
+    --foreground: var(--text-100);
+    
+    --card: var(--bg-100);
+    --card-foreground: var(--text-100);
+    
+    --popover: var(--bg-100);
+    --popover-foreground: var(--text-100);
+    
+    --primary: var(--accent-200);
+    --primary-foreground: var(--bg-100);
+    
+    --secondary: var(--primary-100);
+    --secondary-foreground: var(--text-200);
+    
+    --muted: var(--bg-200);
+    --muted-foreground: var(--text-200);
+    
+    --accent: var(--accent-100);
+    --accent-foreground: var(--text-100);
+    
+    --destructive: 0 72% 51%;
+    --destructive-foreground: var(--bg-100);
+    
+    --border: var(--bg-300);
+    --input: var(--bg-200);
+    --ring: var(--accent-200);
+    
+    --radius: 0.75rem;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-100)), hsl(var(--accent-100)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent-100)), hsl(var(--accent-200)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--bg-100)), hsl(var(--bg-200)));
+    
+    /* Shadows */
+    --shadow-subtle: 0 2px 8px -2px hsl(var(--primary-300) / 0.1);
+    --shadow-medium: 0 8px 16px -4px hsl(var(--primary-300) / 0.15);
+    --shadow-strong: 0 16px 32px -8px hsl(var(--primary-300) / 0.2);
+    --shadow-glow: 0 0 32px hsl(var(--accent-100) / 0.3);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+  }
+
+  .dark {
+    --background: var(--primary-300);
+    --foreground: var(--bg-100);
+    
+    --card: var(--primary-300);
+    --card-foreground: var(--bg-100);
+    
+    --popover: var(--primary-300);
+    --popover-foreground: var(--bg-100);
+    
+    --primary: var(--accent-100);
+    --primary-foreground: var(--primary-300);
+    
+    --secondary: var(--text-200);
+    --secondary-foreground: var(--bg-100);
+    
+    --muted: var(--text-200);
+    --muted-foreground: var(--bg-300);
+    
+    --accent: var(--accent-100);
+    --accent-foreground: var(--primary-300);
+    
+    --border: var(--text-200);
+    --input: var(--text-200);
+    --ring: var(--accent-100);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

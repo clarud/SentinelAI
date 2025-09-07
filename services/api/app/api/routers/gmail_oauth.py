@@ -111,6 +111,8 @@ def oauth2callback(request: Request):
         print(f"Failed to start Gmail watch for {user_email}: {e}")
 
     if FRONTEND_SUCCESS_URL:
-        return RedirectResponse(FRONTEND_SUCCESS_URL, status_code=307)
+        # Redirect to frontend with user email appended to the URL
+        redirect_url = f"{FRONTEND_SUCCESS_URL}/{user_email}"
+        return RedirectResponse(redirect_url, status_code=307)
 
     return JSONResponse({"status": "connected", "email": user_email})
