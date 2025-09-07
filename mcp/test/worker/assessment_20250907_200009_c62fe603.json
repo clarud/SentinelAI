@@ -1,0 +1,327 @@
+{
+  "workflow_id": "c62fe603",
+  "start_time": 1757246409.7921047,
+  "start_timestamp": "2025-09-07T20:00:09.802718",
+  "steps": [
+    {
+      "step_id": 1,
+      "step_name": "document_processing",
+      "description": "Process document and extract text content",
+      "start_time": 1757246409.8027184,
+      "start_timestamp": "2025-09-07T20:00:09.802718",
+      "end_time": 1757246413.8763573,
+      "end_timestamp": "2025-09-07T20:00:13.876357",
+      "duration": 4.073638916015625,
+      "metadata": {
+        "processed_length": 499
+      }
+    },
+    {
+      "step_id": 2,
+      "step_name": "rag_analysis",
+      "description": "Retrieve similar documents from database",
+      "start_time": 1757246413.8773572,
+      "start_timestamp": "2025-09-07T20:00:13.877357",
+      "end_time": 1757246417.962234,
+      "end_timestamp": "2025-09-07T20:00:17.962234",
+      "duration": 4.084876775741577,
+      "metadata": {
+        "tools_executed": 1,
+        "budget_remaining": 5
+      }
+    },
+    {
+      "step_id": 3,
+      "step_name": "router_decision",
+      "description": "ROUTER agent decides workflow path",
+      "start_time": 1757246417.962234,
+      "start_timestamp": "2025-09-07T20:00:17.962234",
+      "end_time": 1757246420.3871508,
+      "end_timestamp": "2025-09-07T20:00:20.387150",
+      "duration": 2.4249167442321777,
+      "metadata": {
+        "route": "full_analysis",
+        "agents_planned": 4
+      }
+    },
+    {
+      "step_id": 4,
+      "step_name": "analyst_agent",
+      "description": "ANALYST agent analyzes evidence",
+      "start_time": 1757246420.3871508,
+      "start_timestamp": "2025-09-07T20:00:20.387150",
+      "end_time": 1757246425.8890047,
+      "end_timestamp": "2025-09-07T20:00:25.889004",
+      "duration": 5.501853942871094,
+      "metadata": {
+        "analysis_generated": true
+      }
+    },
+    {
+      "step_id": 5,
+      "step_name": "supervisor_agent",
+      "description": "SUPERVISOR agent makes final decision",
+      "start_time": 1757246425.8890047,
+      "start_timestamp": "2025-09-07T20:00:25.889004",
+      "end_time": 1757246428.8206787,
+      "end_timestamp": "2025-09-07T20:00:28.820678",
+      "duration": 2.931674003601074,
+      "metadata": {
+        "validation": "success"
+      }
+    },
+    {
+      "step_id": 6,
+      "step_name": "executer_agent",
+      "description": "EXECUTER agent performs final actions",
+      "start_time": 1757246428.8206787,
+      "start_timestamp": "2025-09-07T20:00:28.820678",
+      "end_time": 1757246432.8930206,
+      "end_timestamp": "2025-09-07T20:00:32.893020",
+      "duration": 4.0723419189453125,
+      "metadata": {
+        "executer_steps": 1
+      }
+    },
+    {
+      "step_id": 7,
+      "step_name": "completion",
+      "description": "Finalize assessment and prepare response",
+      "start_time": 1757246432.8930206,
+      "start_timestamp": "2025-09-07T20:00:32.893020"
+    }
+  ],
+  "decisions": [],
+  "tool_calls": [
+    {
+      "server": "data-processor",
+      "tool": "process_email",
+      "args": {
+        "document": {
+          "subject": "Your GitHub security alert",
+          "from": "noreply@github.com",
+          "to": "developer@example.com",
+          "body": "Hello,\n\nWe're writing to let you know that a new personal access token was \ncreated for your account.\n\nToken name: VSCode-Integration\nCreated: September 4, 2025 at 5:20 PM UTC\n\nIf you created this token, you can ignore this email. If you did not \ncreate this token, please review your account security settings.\n\nBest regards,\nThe GitHub Team",
+          "date": "2025-09-04 17:20:00"
+        }
+      },
+      "timestamp": "2025-09-07T20:00:13.876357",
+      "success": false,
+      "error": "[WinError 1225] The remote computer refused the network connection"
+    },
+    {
+      "server": "rag-tools",
+      "tool": "call_rag",
+      "args": {
+        "document": "{'subject': 'Your GitHub security alert', 'from': 'noreply@github.com', 'to': 'developer@example.com', 'body': \"Hello,\\n\\nWe're writing to let you know that a new personal access token was \\ncreated for your account.\\n\\nToken name: VSCode-Integration\\nCreated: September 4, 2025 at 5:20 PM UTC\\n\\nIf you created this token, you can ignore this email. If you did not \\ncreate this token, please review your account security settings.\\n\\nBest regards,\\nThe GitHub Team\", 'date': '2025-09-04 17:20:00'}"
+      },
+      "timestamp": "2025-09-07T20:00:17.961227",
+      "success": false,
+      "error": "[WinError 1225] The remote computer refused the network connection"
+    },
+    {
+      "server": "rag-tools",
+      "tool": "store_rag",
+      "args": {
+        "output": {
+          "is_scam": "not_scam",
+          "confidence_level": 0.9,
+          "scam_probability": 10.0,
+          "explanation": "The email appears to be a legitimate security notification from GitHub about a new personal access token being created. The sender email address, content, and tone are consistent with an official GitHub communication. With a low scam probability and high confidence level from the analysis, this email can be considered not a scam.",
+          "text": "{'subject': 'Your GitHub security alert', 'from': 'noreply@github.com', 'to': 'developer@example.com', 'body': \"Hello,\\n\\nWe're writing to let you know that a new personal access token was \\ncreated for your account.\\n\\nToken name: VSCode-Integration\\nCreated: September 4, 2025 at 5:20 PM UTC\\n\\nIf you created this token, you can ignore this email. If you did not \\ncreate this token, please review your account security settings.\\n\\nBest regards,\\nThe GitHub Team\", 'date': '2025-09-04 17:20:00'}",
+          "email": {
+            "subject": "Your GitHub security alert",
+            "from": "noreply@github.com",
+            "to": "developer@example.com",
+            "body": "Hello,\n\nWe're writing to let you know that a new personal access token was \ncreated for your account.\n\nToken name: VSCode-Integration\nCreated: September 4, 2025 at 5:20 PM UTC\n\nIf you created this token, you can ignore this email. If you did not \ncreate this token, please review your account security settings.\n\nBest regards,\nThe GitHub Team",
+            "date": "2025-09-04 17:20:00"
+          },
+          "tool_evidence": [],
+          "tool_errors": [
+            {
+              "tool": "data-processor.process_email",
+              "error": "[WinError 1225] The remote computer refused the network connection"
+            },
+            {
+              "tool": "rag-tools.call_rag",
+              "error": "[WinError 1225] The remote computer refused the network connection"
+            },
+            {
+              "tool": "rag-tools.store_rag",
+              "error": "[WinError 1225] The remote computer refused the network connection"
+            }
+          ]
+        }
+      },
+      "timestamp": "2025-09-07T20:00:32.893020",
+      "success": false,
+      "error": "[WinError 1225] The remote computer refused the network connection"
+    }
+  ],
+  "performance_metrics": {
+    "input_document_length": {
+      "value": 499,
+      "unit": "characters",
+      "timestamp": "2025-09-07T20:00:09.802718"
+    },
+    "tool_data-processor_process_email_duration": {
+      "value": 4.073638916015625,
+      "unit": "seconds",
+      "timestamp": "2025-09-07T20:00:13.876357"
+    },
+    "processed_document_length": {
+      "value": 499,
+      "unit": "characters",
+      "timestamp": "2025-09-07T20:00:13.876357"
+    },
+    "tool_rag-tools_call_rag_duration": {
+      "value": 4.08387017250061,
+      "unit": "seconds",
+      "timestamp": "2025-09-07T20:00:17.962234"
+    },
+    "tool_rag-tools_store_rag_duration": {
+      "value": 4.0723419189453125,
+      "unit": "seconds",
+      "timestamp": "2025-09-07T20:00:32.893020"
+    }
+  },
+  "errors": [],
+  "final_result": {
+    "is_scam": "not_scam",
+    "confidence_level": 0.9,
+    "scam_probability": 10.0,
+    "explanation": "The email appears to be a legitimate security notification from GitHub about a new personal access token being created. The sender email address, content, and tone are consistent with an official GitHub communication. With a low scam probability and high confidence level from the analysis, this email can be considered not a scam.",
+    "text": "{'subject': 'Your GitHub security alert', 'from': 'noreply@github.com', 'to': 'developer@example.com', 'body': \"Hello,\\n\\nWe're writing to let you know that a new personal access token was \\ncreated for your account.\\n\\nToken name: VSCode-Integration\\nCreated: September 4, 2025 at 5:20 PM UTC\\n\\nIf you created this token, you can ignore this email. If you did not \\ncreate this token, please review your account security settings.\\n\\nBest regards,\\nThe GitHub Team\", 'date': '2025-09-04 17:20:00'}",
+    "email": {
+      "subject": "Your GitHub security alert",
+      "from": "noreply@github.com",
+      "to": "developer@example.com",
+      "body": "Hello,\n\nWe're writing to let you know that a new personal access token was \ncreated for your account.\n\nToken name: VSCode-Integration\nCreated: September 4, 2025 at 5:20 PM UTC\n\nIf you created this token, you can ignore this email. If you did not \ncreate this token, please review your account security settings.\n\nBest regards,\nThe GitHub Team",
+      "date": "2025-09-04 17:20:00"
+    },
+    "tool_evidence": [],
+    "tool_errors": [
+      {
+        "tool": "data-processor.process_email",
+        "error": "[WinError 1225] The remote computer refused the network connection"
+      },
+      {
+        "tool": "rag-tools.call_rag",
+        "error": "[WinError 1225] The remote computer refused the network connection"
+      },
+      {
+        "tool": "rag-tools.store_rag",
+        "error": "[WinError 1225] The remote computer refused the network connection"
+      }
+    ]
+  },
+  "document_info": {
+    "type": "dict",
+    "length": 499
+  },
+  "extra_data": [
+    {
+      "router_decision": {
+        "route": "full_analysis",
+        "reasoning": "The confidence level and scam probability are moderate, indicating uncertainty in the classification.",
+        "agents_to_call": [
+          "PLANNER",
+          "ANALYST",
+          "SUPERVISOR",
+          "EXECUTER"
+        ],
+        "final_classification": null,
+        "skip_to_execution": false
+      }
+    },
+    {
+      "analyst_result": {
+        "scam_probability": 0.1,
+        "confidence_level": 0.9,
+        "tool_outputs": {
+          "extract_text": "{'subject': 'Your GitHub security alert', 'from': 'noreply@github.com', 'to': 'developer@example.com', 'body': \"Hello,\\n\\nWe're writing to let you know that a new personal access token was \\ncreated for your account.\\n\\nToken name: VSCode-Integration\\nCreated: September 4, 2025 at 5:20 PM UTC\\n\\nIf you created this token, you can ignore this email. If you did not \\ncreate this token, please review your account security settings.\\n\\nBest regards,\\nThe GitHub Team\", 'date': '2025-09-04 17:20:00'}",
+          "rag": "GREEN: This email appears to be a legitimate security notification from GitHub about a new personal access token being created for the recipient's account. The email provides details about the token name and creation time, and advises the recipient to review their account security settings if they did not create the token themselves. There are no obvious signs of a scam or malicious intent."
+        }
+      }
+    },
+    {
+      "supervisor_result": {
+        "is_scam": "not_scam",
+        "confidence_level": 0.9,
+        "scam_probability": 10.0,
+        "explanation": "The email appears to be a legitimate security notification from GitHub about a new personal access token being created. The sender email address, content, and tone are consistent with an official GitHub communication. With a low scam probability and high confidence level from the analysis, this email can be considered not a scam.",
+        "text": "{'subject': 'Your GitHub security alert', 'from': 'noreply@github.com', 'to': 'developer@example.com', 'body': \"Hello,\\n\\nWe're writing to let you know that a new personal access token was \\ncreated for your account.\\n\\nToken name: VSCode-Integration\\nCreated: September 4, 2025 at 5:20 PM UTC\\n\\nIf you created this token, you can ignore this email. If you did not \\ncreate this token, please review your account security settings.\\n\\nBest regards,\\nThe GitHub Team\", 'date': '2025-09-04 17:20:00'}"
+      }
+    },
+    {
+      "executer_tools": {
+        "steps": [
+          {
+            "server": "rag-tools",
+            "tool": "store_rag",
+            "args": {
+              "output": {
+                "is_scam": "not_scam",
+                "confidence_level": 0.9,
+                "scam_probability": 10.0,
+                "explanation": "The email appears to be a legitimate security notification from GitHub about a new personal access token being created. The sender email address, content, and tone are consistent with an official GitHub communication. With a low scam probability and high confidence level from the analysis, this email can be considered not a scam.",
+                "text": "{'subject': 'Your GitHub security alert', 'from': 'noreply@github.com', 'to': 'developer@example.com', 'body': \"Hello,\\n\\nWe're writing to let you know that a new personal access token was \\ncreated for your account.\\n\\nToken name: VSCode-Integration\\nCreated: September 4, 2025 at 5:20 PM UTC\\n\\nIf you created this token, you can ignore this email. If you did not \\ncreate this token, please review your account security settings.\\n\\nBest regards,\\nThe GitHub Team\", 'date': '2025-09-04 17:20:00'}",
+                "email": {
+                  "subject": "Your GitHub security alert",
+                  "from": "noreply@github.com",
+                  "to": "developer@example.com",
+                  "body": "Hello,\n\nWe're writing to let you know that a new personal access token was \ncreated for your account.\n\nToken name: VSCode-Integration\nCreated: September 4, 2025 at 5:20 PM UTC\n\nIf you created this token, you can ignore this email. If you did not \ncreate this token, please review your account security settings.\n\nBest regards,\nThe GitHub Team",
+                  "date": "2025-09-04 17:20:00"
+                },
+                "tool_evidence": [],
+                "tool_errors": [
+                  {
+                    "tool": "data-processor.process_email",
+                    "error": "[WinError 1225] The remote computer refused the network connection"
+                  },
+                  {
+                    "tool": "rag-tools.call_rag",
+                    "error": "[WinError 1225] The remote computer refused the network connection"
+                  },
+                  {
+                    "tool": "rag-tools.store_rag",
+                    "error": "[WinError 1225] The remote computer refused the network connection"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "count": 1
+      }
+    },
+    {
+      "executer_results": {
+        "evidence_count": 0,
+        "error_count": 3,
+        "evidence": [],
+        "errors": [
+          {
+            "tool": "data-processor.process_email",
+            "error": "[WinError 1225] The remote computer refused the network connection"
+          },
+          {
+            "tool": "rag-tools.call_rag",
+            "error": "[WinError 1225] The remote computer refused the network connection"
+          },
+          {
+            "tool": "rag-tools.store_rag",
+            "error": "[WinError 1225] The remote computer refused the network connection"
+          }
+        ]
+      }
+    }
+  ],
+  "document_id": "unknown",
+  "end_time": 1757246432.8930206,
+  "end_timestamp": "2025-09-07T20:00:32.893020",
+  "total_processing_time": 23.090302228927612,
+  "evidence_count": 0,
+  "error_count": 3,
+  "workflow_duration": 23.100915908813477
+}

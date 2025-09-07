@@ -1,17 +1,27 @@
 from fastapi import UploadFile
 import pytesseract
 from PIL import Image
-import fitz  # PyMuPDF
 from io import BytesIO
 import time
 
+# Try to import PyMuPDF with fallback
+try:
+    import fitz  # PyMuPDF - make sure this is the right package
+    HAS_PYMUPDF = True
+except ImportError as e:
+    HAS_PYMUPDF = False
+    print(f"Warning: PyMuPDF not available: {e}. PDF processing will be disabled.")
+
 # -------- Function to extract text from PIL Image object --------
 def extract_text_from_image_object(image_obj: Image.Image):
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
     return pytesseract.image_to_string(image_obj)
 
 # -------- Function to extract text from PDF bytes --------
 def extract_text_from_pdf_bytes(pdf_bytes: bytes):
+    if not HAS_PYMUPDF:
+        raise ImportError("PyMuPDF is not available. Cannot process PDF files.")
+    
     text = ""
     pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
     
@@ -37,6 +47,8 @@ def convert_file_to_string(file: UploadFile) -> str:
         image = Image.open(BytesIO(file_contents))
         return extract_text_from_image_object(image)
     elif file.content_type == "application/pdf":
+        if not HAS_PYMUPDF:
+            raise ValueError("PDF processing is not available. PyMuPDF is not installed.")
         return extract_text_from_pdf_bytes(file_contents)
     else:
         raise ValueError(f"Unsupported file type: {file.content_type}")

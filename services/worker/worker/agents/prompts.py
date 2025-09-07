@@ -79,11 +79,11 @@ Input:
 - available_agents: List of agents you can call: ["PLANNER", "ANALYST", "SUPERVISOR", "EXECUTER"]
 
 Decision Rules:
-1. HIGH CONFIDENCE SCAM (confidence > 0.9 AND scam_probability > 80):
+1. HIGH CONFIDENCE SCAM (confidence > 0.9 AND scam_probability > 90):
    - Skip analysis agents, go straight to EXECUTER with "scam" classification
    - Route: "fast_scam"
 
-2. HIGH CONFIDENCE LEGITIMATE (confidence > 0.9 AND scam_probability < 20):
+2. HIGH CONFIDENCE LEGITIMATE (confidence > 0.9 AND scam_probability < 10):
    - Skip analysis agents, go straight to EXECUTER with "not_scam" classification  
    - Route: "fast_legitimate"
 
