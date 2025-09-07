@@ -26,11 +26,11 @@ export function ChatBot({ report }: ChatBotProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Scroll to bottom when new messages are added
+    // Scroll to bottom when new messages are added or input is cleared
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, currentInput]);
 
   const handleSendMessage = async () => {
     if (!currentInput.trim()) return;
@@ -40,8 +40,7 @@ export function ChatBot({ report }: ChatBotProps) {
       content: currentInput
     };
 
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
     setCurrentInput('');
     setIsLoading(true);
 
@@ -50,10 +49,12 @@ export function ChatBot({ report }: ChatBotProps) {
       const response = await apiClient.chat({
         context,
         current_input: currentInput,
-        history: newMessages
+        history: messages // Pass the history without appending the user message again
       });
 
-      setMessages(response.history);
+      // Append only the latest assistant response to the chat
+      const latestResponse = response.history[response.history.length - 1];
+      setMessages((prevMessages) => [...prevMessages, latestResponse]);
     } catch (error) {
       console.error('Chat request failed:', error);
       toast({
@@ -61,13 +62,12 @@ export function ChatBot({ report }: ChatBotProps) {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
-      
-      // Add error message to chat
+
       const errorMessage: ChatMessage = {
         role: "assistant",
         content: "I'm sorry, I'm having trouble responding right now. Please try again in a moment."
       };
-      setMessages([...newMessages, errorMessage]);
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -89,9 +89,9 @@ export function ChatBot({ report }: ChatBotProps) {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-4 space-y-4">
+      <CardContent className="flex-1 flex flex-col p-4 space-y-4 overflow-hidden">
         {/* Messages Area */}
-        <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 pr-4 overflow-y-auto" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div

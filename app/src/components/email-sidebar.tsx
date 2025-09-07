@@ -39,11 +39,12 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
       const userEmail = sessionStorage.getItem("user_email");
       if (!userEmail) return;
 
-      const response = await fetch(`/api/firestore/emails/${userEmail}`);
+      const response = await fetch(`https://sentinelai-services.onrender.com/api/firestore/emails/${userEmail}`);
       if (!response.ok) {
         throw new Error("Failed to fetch email IDs");
       }
       const emailList = await response.json();
+      console.log("Fetched emails:", emailList);
       setEmails(emailList);
     } catch (error) {
       console.error("Failed to fetch emails:", error);
@@ -113,7 +114,24 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
                 selectedEmailId === emailId && "bg-accent-100 hover:bg-accent-100 shadow-md scale-[1.02]"
               )}
               style={{ animationDelay: `${index * 0.05}s` }}
-              onClick={() => onEmailSelect(emailId)}
+              onClick={async () => {
+                onEmailSelect(emailId);
+                const userEmail = sessionStorage.getItem("user_email");
+                if (!userEmail) return;
+
+                try {
+                  const response = await fetch(`https://sentinelai-services.onrender.com/api/firestore/emails/${userEmail}/${emailId}`);
+                  if (!response.ok) {
+                    throw new Error("Failed to fetch email details");
+                  }
+                  const emailDetails = await response.json();
+                  console.log("Email details:", emailDetails);
+                  // Pass the email details to the report-display component
+                  // This assumes a shared state or context is used to pass data
+                } catch (error) {
+                  console.error("Failed to fetch email details:", error);
+                }
+              }}
             >
               <Mail className="h-4 w-4 mr-2 flex-shrink-0 transition-transform hover:scale-110" />
               <span className="truncate">{emailId}</span>

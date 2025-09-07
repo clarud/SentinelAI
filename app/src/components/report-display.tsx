@@ -88,12 +88,34 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
     }
   };
 
+  const fetchEmailDetails = async (emailId: string) => {
+    setIsLoading(true);
+    try {
+      const userEmail = sessionStorage.getItem("user_email");
+      if (!userEmail) return;
+
+      const response = await fetch(`https://sentinelai-services.onrender.com/api/firestore/emails/${userEmail}/${emailId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch email details");
+      }
+      const data = await response.json();
+      setReport(data);
+      onReportChange(data);
+    } catch (error) {
+      console.error("Failed to fetch email details:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Handle email selection in live mode
   React.useEffect(() => {
     if (activeTab === 'live' && selectedEmailId) {
-      fetchEmailReport(selectedEmailId);
+      fetchEmailDetails(selectedEmailId);
     }
   }, [selectedEmailId, activeTab]);
+
+
 
   const getScamIcon = (scamType: string) => {
     switch (scamType.toLowerCase()) {
