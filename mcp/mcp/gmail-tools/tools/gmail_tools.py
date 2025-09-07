@@ -1,4 +1,4 @@
-from services.api.app.api.routers.gmail_watch import GmailWatcher
+from tools.gmail_watcher import GmailWatcher
 
 def get_or_create_scam_label(service):
     """
