@@ -35,3 +35,4 @@ rsa>=4.8  # Used by google-auth
 
 # Others
 fastapi
+uvicorn
