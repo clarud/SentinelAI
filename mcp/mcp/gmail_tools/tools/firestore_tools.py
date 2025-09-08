@@ -31,7 +31,7 @@ def store_analysis_data(data: Dict):
             raise ValueError("The 'email' dictionary must contain an 'email_address' field.")
 
         # Store the entire input dictionary in Firestore under the specified structure
-        db.collection(COLLECTION).document(email_address).collection("emails").document(document_id).set(data)
+        db.collection(COLLECTION).document(email_address).collection("emails").document(document_id).set(data, merge=True)
 
         return document_id
 
