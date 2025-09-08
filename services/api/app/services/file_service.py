@@ -3,6 +3,7 @@ import pytesseract
 from PIL import Image
 from io import BytesIO
 import time
+from api.app.services.ocr_extraction import extract_text_from_image_object_api, extract_text_from_pdf_bytes_api
 
 # Try to import PyMuPDF with fallback
 try:
@@ -43,13 +44,13 @@ def convert_file_to_string(file: UploadFile) -> str:
     file.file.seek(0)
     
     if file.content_type in ["image/jpeg", "image/png"]:
-        # Create PIL Image from bytes instead of file stream
+        # Create PIL Image from bytes using BytesIO
         image = Image.open(BytesIO(file_contents))
-        return extract_text_from_image_object(image)
+        return extract_text_from_image_object_api(image)
     elif file.content_type == "application/pdf":
         if not HAS_PYMUPDF:
             raise ValueError("PDF processing is not available. PyMuPDF is not installed.")
-        return extract_text_from_pdf_bytes(file_contents)
+        return extract_text_from_pdf_bytes_api(file_contents)
     else:
         raise ValueError(f"Unsupported file type: {file.content_type}")
 
