@@ -1,11 +1,16 @@
 import io
-from typing import Dict, Any, List, Union
+import logging
+from typing import Dict, Any, List, Union, Optional
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleRequest
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 from google.cloud import firestore
 from datetime import datetime
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # --- ReportLab imports ---
 from reportlab.lib import colors
@@ -33,10 +38,18 @@ COLLECTION = "gmail_tokens"
 
 def get_tokens(user_email: str):
     """Retrieve OAuth token data from Firestore"""
+    logger.info(f"🔑 Getting tokens for user: {user_email}")
+    logger.info(f"🔥 Firestore collection: {COLLECTION}")
+    
     doc = db.collection(COLLECTION).document(user_email).get()
     if not doc.exists:
+        logger.warning(f"⚠️ No token document found for user: {user_email}")
         return None
-    return doc.to_dict()
+    
+    token_data = doc.to_dict()
+    logger.info(f"✅ Tokens retrieved successfully for user: {user_email}")
+    logger.info(f"🔍 Token data keys: {list(token_data.keys()) if token_data else 'None'}")
+    return token_data
 
 def create_credentials_from_dict(token_data):
     """Create Credentials object from stored token data"""
@@ -60,30 +73,56 @@ def create_credentials_from_dict(token_data):
 
 def store_drive_link(user_email: str, message_id: str, drive_link: str):
     """Store Google Drive link reference in Firestore"""
+    logger.info(f"🔄 Starting store_drive_link for user: {user_email}, message: {message_id}")
+    logger.info(f"📎 Drive link to store: {drive_link}")
+    
     try:
+        logger.info(f"🔥 Attempting to write to Firestore collection: {COLLECTION}")
+        logger.info(f"📧 Document path: {COLLECTION}/{user_email}/emails/{message_id}")
+        
         # Store the drive link in the email document
-        db.collection(COLLECTION).document(user_email).collection('emails').document(message_id).set({
+        doc_data = {
             'drive_analysis_link': drive_link,
             'drive_upload_timestamp': datetime.now().isoformat()
-        }, merge=True)
+        }
+        logger.info(f"📝 Data to store: {doc_data}")
+        
+        db.collection(COLLECTION).document(user_email).collection('emails').document(message_id).set(doc_data, merge=True)
+        
+        logger.info(f"✅ Successfully stored drive link in Firestore for {user_email}/{message_id}")
         return True
     except Exception as e:
+        logger.error(f"❌ Error storing drive link: {e}")
+        logger.error(f"🔍 Exception type: {type(e).__name__}")
+        logger.error(f"📍 Failed for user: {user_email}, message: {message_id}")
         print(f"Error storing drive link: {e}")
         return False
 
 def get_google_drive_service(user_email: str):
     """Get authenticated Google Drive service"""
+    logger.info(f"🔧 Creating Google Drive service for user: {user_email}")
+    
     token_data = get_tokens(user_email)
     if not token_data:
+        logger.error(f"❌ No tokens found for user: {user_email}")
         raise Exception("No tokens found for user")
-        
+    
+    logger.info(f"🔄 Creating credentials from token data...")
     credentials = create_credentials_from_dict(token_data)
     
     # Refresh token if expired
     if credentials.expired and credentials.refresh_token:
+        logger.info(f"🔄 Token expired, refreshing...")
         credentials.refresh(GoogleRequest())
+        logger.info(f"✅ Token refreshed successfully")
+    else:
+        logger.info(f"✅ Token is valid, no refresh needed")
     
-    return build("drive", "v3", credentials=credentials)
+    logger.info(f"🏗️ Building Google Drive service...")
+    service = build("drive", "v3", credentials=credentials)
+    logger.info(f"✅ Google Drive service created successfully")
+    
+    return service
 
 
 class Badge(Flowable):
@@ -488,26 +527,37 @@ def upload_to_google_drive(user_email: str, pdf_buffer: io.BytesIO, filename: st
     Returns:
         Shareable Google Drive link
     """
+    logger.info(f"☁️ Starting Google Drive upload for user: {user_email}")
+    logger.info(f"📁 Filename: {filename}")
+    logger.info(f"📊 PDF buffer size: {pdf_buffer.getvalue().__len__()} bytes")
+    
     try:
+        logger.info(f"🔑 Getting Google Drive service...")
         service = get_google_drive_service(user_email)
+        logger.info(f"✅ Google Drive service obtained successfully")
         
         # IMPORTANT: Ensure buffer is positioned at the start
         pdf_buffer.seek(0)
+        logger.info(f"📍 Buffer position reset to start")
         
         # File metadata
         file_metadata = {
             'name': filename,
             'parents': []  # Upload to root directory, could be modified to use specific folder
         }
+        logger.info(f"📋 File metadata: {file_metadata}")
         
         # Create media upload
+        logger.info(f"🔄 Creating media upload object...")
         media = MediaIoBaseUpload(
             pdf_buffer,
             mimetype='application/pdf',
             resumable=True
         )
+        logger.info(f"✅ Media upload object created")
         
         # Upload file
+        logger.info(f"⬆️ Starting file upload to Google Drive...")
         file = service.files().create(
             body=file_metadata,
             media_body=media,
@@ -515,8 +565,10 @@ def upload_to_google_drive(user_email: str, pdf_buffer: io.BytesIO, filename: st
         ).execute()
         
         file_id = file.get('id')
+        logger.info(f"✅ File uploaded successfully, ID: {file_id}")
         
         # Make file shareable (anyone with link can view)
+        logger.info(f"🔓 Setting file permissions...")
         permission = {
             'type': 'anyone',
             'role': 'reader'
@@ -526,13 +578,18 @@ def upload_to_google_drive(user_email: str, pdf_buffer: io.BytesIO, filename: st
             fileId=file_id,
             body=permission
         ).execute()
+        logger.info(f"✅ File permissions set successfully")
         
         # Get shareable link
         drive_link = f"https://drive.google.com/file/d/{file_id}/view"
+        logger.info(f"🔗 Generated shareable link: {drive_link}")
         
         return drive_link
         
     except Exception as e:
+        logger.error(f"💥 Google Drive upload failed: {e}")
+        logger.error(f"🔍 Exception type: {type(e).__name__}")
+        logger.error(f"📧 Failed for user: {user_email}, filename: {filename}")
         raise Exception(f"Failed to upload to Google Drive: {e}")
 
 def create_and_upload_analysis_pdf(user_email: str, message_id: str, analysis_data: Dict[str, Any], 
@@ -549,21 +606,33 @@ def create_and_upload_analysis_pdf(user_email: str, message_id: str, analysis_da
     Returns:
         Dictionary with upload results and drive link
     """
+    logger.info(f"🚀 Starting create_and_upload_analysis_pdf for user: {user_email}")
+    logger.info(f"📧 Message ID: {message_id}")
+    logger.info(f"📊 Analysis data keys: {list(analysis_data.keys()) if analysis_data else 'None'}")
+    logger.info(f"📄 PDF title: {title}")
+    
     try:
         # Generate filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"email_analysis_{message_id[:8]}_{timestamp}.pdf"
+        logger.info(f"📁 Generated filename: {filename}")
         
         # Create PDF from dictionary
+        logger.info(f"🔨 Building PDF report...")
         pdf_buffer = build_scam_report_pdf(analysis_data, title)
+        logger.info(f"✅ PDF generated successfully, buffer size: {pdf_buffer.getvalue().__len__()} bytes")
 
         # Upload to Google Drive
+        logger.info(f"☁️ Uploading to Google Drive...")
         drive_link = upload_to_google_drive(user_email, pdf_buffer, filename)
+        logger.info(f"✅ Upload successful, drive link: {drive_link}")
         
         # Store reference in Firestore
+        logger.info(f"💾 Storing drive link in Firestore...")
         stored = store_drive_link(user_email, message_id, drive_link)
+        logger.info(f"📝 Firestore storage result: {stored}")
         
-        return {
+        result = {
             "status": "success",
             "drive_link": drive_link,
             "filename": filename,
@@ -572,9 +641,21 @@ def create_and_upload_analysis_pdf(user_email: str, message_id: str, analysis_da
             "upload_timestamp": datetime.now().isoformat()
         }
         
+        logger.info(f"🎉 create_and_upload_analysis_pdf completed successfully")
+        logger.info(f"📋 Final result: {result}")
+        
+        return result
+        
     except Exception as e:
-        return {
+        error_result = {
             "status": "error",
             "error": str(e),
             "message_id": message_id
         }
+        
+        logger.error(f"💥 create_and_upload_analysis_pdf failed: {e}")
+        logger.error(f"🔍 Exception type: {type(e).__name__}")
+        logger.error(f"📧 Failed for user: {user_email}, message: {message_id}")
+        logger.error(f"❌ Error result: {error_result}")
+        
+        return error_result
