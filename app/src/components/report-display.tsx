@@ -67,20 +67,22 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
 
   const handleDownload = async () => {
     if (!selectedEmailId) return;
-    
+
     setIsDownloading(true);
     try {
-      const driveLink = await apiClient.downloadReport(selectedEmailId);
-      window.open(driveLink, '_blank');
+      if (!report?.drive_analysis_link) {
+        throw new Error("Drive analysis link is not available.");
+      }
+      window.open(report.drive_analysis_link, '_blank');
       toast({
         title: "Download started",
-        description: "Report is being downloaded from Google Drive.",
+        description: "Redirecting to the Google Drive file.",
       });
     } catch (error) {
       console.error('Download failed:', error);
       toast({
         title: "Download failed",
-        description: "Failed to download the report. Please try again.",
+        description: error.message || "Failed to download the report. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -23,6 +23,7 @@ export interface ScamReport {
   tool_evidence?: Array<Record<string, any>>;
   tool_errors?: Array<Record<string, any>>;
   processing_metadata: Record<string, any>;
+  drive_analysis_link?: string; // Added field for Google Drive link of analysis report
 }
 
 export interface ChatMessage {
