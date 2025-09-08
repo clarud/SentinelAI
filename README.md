@@ -7,7 +7,8 @@
 
 SentinelAI is a comprehensive, multi-service fraud detection platform that uses advanced AI agents, RAG, and automation to identify and mitigate email-based security threats in real-time.
 
-**Deployed Webpage**
+**Deployed Webpage** 
+
 Our product is live on this URL: https://sentinel-ai-seven.vercel.app/. Do note that only authorized users are granted permission to login due OAuth restrictions in development.
 
 ## 🌟 Key Features
