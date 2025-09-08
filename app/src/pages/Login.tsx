@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Shield, Eye, Chrome } from 'lucide-react';
 import { apiClient } from '@/lib/api';
-import sentinelLogo from '@/assets/sentinel-logo.png';
+import sentinelLogo from '@/assets/SentinelAI_Logo.png';
 
 export default function Login() {
   const handleGmailConnect = () => {
@@ -15,11 +15,16 @@ export default function Login() {
         <CardHeader className="text-center space-y-6 pt-8">
           {/* Logo and Branding */}
           <div className="flex flex-col items-center space-y-4">
-            <div className="relative">
+            <div className="relative bg-transparent">
               <img 
                 src={sentinelLogo} 
                 alt="SentinelAI Logo" 
-                className="w-20 h-20 animate-glow"
+                className="w-20 h-20 bg-transparent"
+                style={{ 
+                  backgroundColor: 'transparent !important',
+                  background: 'none',
+                  boxShadow: 'none'
+                }}
               />
             </div>
             
