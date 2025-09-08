@@ -8,17 +8,54 @@ import asyncio, json
 from typing import Any, Dict
 import websockets
 from .registry import MCP_SERVERS
+import requests
+
+def _warmup(base_url: str, timeout_s: float = 10):
+    try:
+        resp = requests.get(f"{base_url}/health", timeout=timeout_s)
+        if resp.status_code == 200:
+            print("✅ Warmed up:", resp.json())
+        else:
+            print("⚠️ Warmup failed:", resp.status_code, resp.text)
+    except Exception as e:
+        print("⚠️ Warmup error:", e)
+
+import asyncio
+
+async def _retry_connect(url, max_retries=3, delay=2):
+    for attempt in range(max_retries):
+        try:
+            return await websockets.connect(url, ping_interval=None, max_size=2**24)
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise
+            print(f"⚠️ Connect failed ({e}), retrying in {delay}s...")
+            await asyncio.sleep(delay)
+
 
 async def _acall(url: str, tool: str, args: Dict[str, Any], timeout_s: float) -> Dict[str, Any]:
-    async with websockets.connect(url, ping_interval=None, max_size=2**24) as ws:
+    # Warm up service
+    base_url = url.replace("wss://", "https://").replace("ws://", "http://").rstrip("/ws")
+    _warmup(base_url)
+
+    async with await _retry_connect(url) as ws:
         req = {"type": "call_tool", "name": tool, "arguments": args}
         await ws.send(json.dumps(req))
-        raw = await asyncio.wait_for(ws.recv(), timeout=timeout_s)
-        resp = json.loads(raw)
+
+        try:
+            raw = await asyncio.wait_for(ws.recv(), timeout=timeout_s)
+        except asyncio.TimeoutError:
+            return {"error": f"Timeout after {timeout_s}s"}
+
+        try:
+            resp = json.loads(raw)
+        except Exception as e:
+            raise RuntimeError(f"Invalid JSON from server: {raw} ({e})")
+
         if resp.get("type") != "tool_result":
-            raise RuntimeError(f"Bad MCP response type: {resp.get('type')}")
+            raise RuntimeError(f"Bad MCP response: {resp}")
         if not resp.get("ok", False):
-            raise RuntimeError(resp.get("error", "tool failed"))
+            raise RuntimeError(f"Tool {tool} failed: {resp.get('error')}")
         return resp.get("data", {})
 
 def call_tool(server_key: str, tool: str, **kwargs) -> Dict[str, Any]:
