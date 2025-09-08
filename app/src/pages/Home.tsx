@@ -6,7 +6,7 @@ import { ChatBot } from '@/components/chat-bot';
 import { Button } from '@/components/ui/button';
 import { ScamReport } from '@/lib/api';
 import { Shield, LogOut } from 'lucide-react';
-import sentinelLogo from '@/assets/SentinelAILogo.png';
+import sentinelLogo from '@/assets/SentinelAI_Logo.png';
 
 export default function Home() {
   const { user_email } = useParams();
