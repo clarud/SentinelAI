@@ -21,7 +21,23 @@ export default function Home() {
     }
   }, [user_email]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const userEmail = sessionStorage.getItem('user_email') || user_email;
+    
+    // Stop email watching if user email is available
+    if (userEmail) {
+      try {
+        const response = await fetch(`https://sentinelai-services.onrender.com/api/stop-watch/${userEmail}`, {
+          method: 'POST',
+        });
+        if (!response.ok) {
+          console.warn('Failed to stop email watching:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error stopping email watch:', error);
+      }
+    }
+    
     // Clear session storage
     sessionStorage.removeItem('user_email');
     // Redirect to login page (assuming root path is login)
