@@ -5,7 +5,7 @@ import { ReportDisplay } from '@/components/report-display';
 import { ChatBot } from '@/components/chat-bot';
 import { ScamReport } from '@/lib/api';
 import { Shield } from 'lucide-react';
-import sentinelLogo from '@/assets/sentinel-logo.png';
+import sentinelLogo from '@/assets/SentinelAI_logo.png';
 
 export default function Home() {
   const { user_email } = useParams();
