@@ -190,7 +190,7 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
   };
 
   return (
-    <Card className="h-full animate-fade-in">
+    <Card className="h-full animate-fade-in border-white/30">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 animate-slide-in-right">
@@ -214,16 +214,16 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
 
       <CardContent className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 transition-all duration-200">
+          <TabsList className="grid w-full grid-cols-2 transition-all duration-200 bg-surface-100/80 border border-white/30">
             <TabsTrigger 
               value="live" 
-              className="transition-all duration-200 hover:scale-105"
+              className="transition-all duration-200 hover:scale-105 data-[state=active]:bg-gradient-accent data-[state=active]:text-white data-[state=active]:shadow-cyber"
             >
               Live
             </TabsTrigger>
             <TabsTrigger 
               value="upload"
-              className="transition-all duration-200 hover:scale-105"
+              className="transition-all duration-200 hover:scale-105 data-[state=active]:bg-gradient-accent data-[state=active]:text-white data-[state=active]:shadow-cyber"
             >
               Upload
             </TabsTrigger>

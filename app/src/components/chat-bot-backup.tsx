@@ -47,29 +47,35 @@ export function ChatBot({ currentReport }: ChatBotProps) {
         });
       } else if (scrollAreaRef.current) {
         // Fallback to scrollArea if messagesEndRef isn't available
-        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        scrollAreaRef.current.scrollTo({ 
+          top: scrollAreaRef.current.scrollHeight, 
+          behavior: 'smooth' 
+        });
       }
     });
   };
 
   const handleSendMessage = async () => {
-    if (!currentInput.trim() || isLoading) return;
+    if (!currentInput.trim()) return;
 
     const userMessage: ChatMessage = {
       role: "user",
-      content: currentInput.trim()
+      content: currentInput
     };
 
-    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
     setCurrentInput('');
     setIsLoading(true);
 
     try {
       const context = currentReport ? JSON.stringify(currentReport) : '';
-      
-      const response = await apiClient.sendChatMessage(userMessage.content, context);
-      
-      // Add the assistant's response
+      const response = await apiClient.chat({
+        context,
+        current_input: currentInput,
+        history: messages // Pass the history without appending the user message again
+      });
+
+      // Append only the latest assistant response to the chat
       const latestResponse = response.history[response.history.length - 1];
       setMessages((prevMessages) => [...prevMessages, latestResponse]);
     } catch (error) {
@@ -99,8 +105,8 @@ export function ChatBot({ currentReport }: ChatBotProps) {
 
   return (
     <div className="h-full flex flex-col animate-fade-in bg-gradient-card/80 backdrop-blur-sm">
-      <div className="pb-4 px-4 pt-4 border-b border-white/30">
-        <div className="flex items-center gap-3 animate-slide-in-right p-3 rounded-xl bg-surface-100/50 border border-white/20 shadow-subtle">
+      <div className="pb-4 px-4 pt-4 border-b border-border/30">
+        <div className="flex items-center gap-3 animate-slide-in-right p-3 rounded-xl bg-surface-100/50 border border-border/20 shadow-subtle">
           <div className="p-2 rounded-lg bg-gradient-primary/30">
             <MessageCircle className="h-5 w-5 text-cyber-blue transition-transform hover:scale-110" />
           </div>
@@ -131,7 +137,7 @@ export function ChatBot({ currentReport }: ChatBotProps) {
                     "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-medium border",
                     message.role === "user" 
                       ? "bg-gradient-accent text-white border-cyber-blue/30" 
-                      : "bg-gradient-card/80 text-muted-foreground border-white/20 backdrop-blur-sm"
+                      : "bg-gradient-card/80 text-muted-foreground border-border/20 backdrop-blur-sm"
                   )}>
                     {message.role === "user" ? (
                       <User className="h-4 w-4" />
@@ -145,7 +151,7 @@ export function ChatBot({ currentReport }: ChatBotProps) {
                       "rounded-xl px-4 py-3 text-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-medium border backdrop-blur-sm",
                       message.role === "user"
                         ? "bg-gradient-accent text-white border-cyber-blue/30 shadow-cyber"
-                        : "bg-surface-100/80 dark:bg-primary-300/80 text-gray-900 dark:text-surface-100 border-white/20"
+                        : "bg-surface-100/80 text-foreground border-border/20"
                     )}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
@@ -157,10 +163,10 @@ export function ChatBot({ currentReport }: ChatBotProps) {
             {isLoading && (
               <div className="flex gap-3 justify-start animate-fade-in">
                 <div className="flex gap-3 max-w-[80%]">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-card/80 text-muted-foreground flex items-center justify-center border border-white/20 backdrop-blur-sm">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-card/80 text-muted-foreground flex items-center justify-center border border-border/20 backdrop-blur-sm">
                     <Bot className="h-4 w-4 text-cyber-blue" />
                   </div>
-                  <div className="bg-surface-100/80 dark:bg-primary-300/80 text-gray-900 dark:text-surface-100 rounded-xl px-4 py-3 text-sm flex items-center gap-2 border border-white/20 backdrop-blur-sm">
+                  <div className="bg-surface-100/80 text-foreground rounded-xl px-4 py-3 text-sm flex items-center gap-2 border border-border/20 backdrop-blur-sm">
                     <LoadingSpinner size="sm" />
                     <span className="animate-pulse-soft">Thinking...</span>
                   </div>
@@ -174,14 +180,14 @@ export function ChatBot({ currentReport }: ChatBotProps) {
         </ScrollArea>
 
         {/* Input Area */}
-        <div className="flex gap-3 animate-fade-in-up p-3 rounded-xl bg-surface-100/50 dark:bg-primary-300/50 border border-white/20 shadow-subtle">
+        <div className="flex gap-3 animate-fade-in-up p-3 rounded-xl bg-surface-100/50 border border-border/20 shadow-subtle">
           <Input
             placeholder="Ask about security threats, email analysis, or cybersecurity..."
             value={currentInput}
             onChange={(e) => setCurrentInput(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
-            className="flex-1 transition-all duration-200 focus:scale-[1.01] border-cyber-blue/20 focus:border-cyber-blue/40 bg-surface-100/80 dark:bg-primary-300/80 backdrop-blur-sm"
+            className="flex-1 transition-all duration-200 focus:scale-[1.01] border-cyber-blue/20 focus:border-cyber-blue/40 bg-surface-100/80 backdrop-blur-sm"
           />
           <Button
             onClick={handleSendMessage}
@@ -195,7 +201,7 @@ export function ChatBot({ currentReport }: ChatBotProps) {
 
         {/* Context Indicator */}
         {currentReport && (
-          <div className="text-xs text-muted-foreground border-t border-white/30 pt-3 animate-fade-in transition-colors hover:text-cyber-blue px-3 py-2 rounded-lg bg-cyber-blue/5">
+          <div className="text-xs text-muted-foreground border-t border-border/30 pt-3 animate-fade-in transition-colors hover:text-cyber-blue px-3 py-2 rounded-lg bg-cyber-blue/5">
             💡 Chat context includes the current analysis report
           </div>
         )}

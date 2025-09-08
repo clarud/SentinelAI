@@ -62,11 +62,11 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
   };
 
   return (
-    <Card className="h-full p-4 border-r border-border flex flex-col">
+    <div className="h-full p-4 flex flex-col bg-gradient-card/80 backdrop-blur-sm">
       <div className="flex flex-col h-full space-y-4">
         {/* Toggle Switch */}
-        <div className="pb-4 border-b border-border animate-fade-in flex-shrink-0">
-          <div className="transition-transform hover:scale-105">
+        <div className="pb-4 border-b border-white/30 animate-fade-in flex-shrink-0">
+          <div className="transition-transform hover:scale-105 p-3 rounded-xl bg-surface-100/50 border border-white/20 shadow-subtle">
             <ToggleSwitch
               label="Toggle email listen"
               checked={isListening}
@@ -75,8 +75,8 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
           </div>
           {isListening && (
             <p className={cn(
-              "text-xs mt-2 flex items-center gap-1 transition-all duration-300 animate-pulse-soft",
-              "text-accent-200"
+              "text-xs mt-3 flex items-center gap-1 transition-all duration-300 animate-pulse-soft px-3 py-2 rounded-lg bg-cyber-blue/10 border border-cyber-blue/20",
+              "text-cyber-blue font-medium"
             )}>
               <Clock className="h-3 w-3" />
               Checking every minute
@@ -111,8 +111,10 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
               key={emailId}
               variant={selectedEmailId === emailId ? "default" : "ghost"}
               className={cn(
-                "w-full justify-start text-left h-auto p-3 transition-all duration-200 animate-fade-in hover:scale-[1.02] hover:shadow-md",
-                selectedEmailId === emailId && "bg-accent-100 hover:bg-accent-100 shadow-md scale-[1.02]"
+                "w-full justify-start text-left h-auto p-4 transition-all duration-200 animate-fade-in hover:scale-[1.02] hover:shadow-medium rounded-xl border",
+                selectedEmailId === emailId 
+                  ? "bg-gradient-primary/80 hover:bg-gradient-primary border-cyber-blue/30 shadow-cyber text-primary-300" 
+                  : "bg-surface-100/50 hover:bg-surface-100/80 border-white/20 hover:border-cyber-blue/20 backdrop-blur-sm"
               )}
               style={{ animationDelay: `${index * 0.05}s` }}
               onClick={async () => {
@@ -134,12 +136,15 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
                 }
               }}
             >
-              <Mail className="h-4 w-4 mr-2 flex-shrink-0 transition-transform hover:scale-110" />
-              <span className="truncate">{emailId}</span>
+              <Mail className={cn(
+                "h-4 w-4 mr-3 flex-shrink-0 transition-all duration-200",
+                selectedEmailId === emailId ? "text-cyber-blue scale-110" : "text-muted-foreground group-hover:text-cyber-blue"
+              )} />
+              <span className="truncate font-medium">{emailId}</span>
             </Button>
           ))}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
