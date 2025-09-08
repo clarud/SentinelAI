@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      spacing: {
+        '128': '32rem',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -43,6 +46,12 @@ export default {
           foreground: "hsl(var(--accent-foreground))",
           100: "hsl(var(--accent-100))",
           200: "hsl(var(--accent-200))",
+          300: "hsl(var(--accent-300))",
+        },
+        cyber: {
+          blue: "hsl(var(--cyber-blue))",
+          purple: "hsl(var(--cyber-purple))",
+          teal: "hsl(var(--cyber-teal))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -61,17 +70,25 @@ export default {
           200: "hsl(var(--bg-200))",
           300: "hsl(var(--bg-300))",
         },
+        surface: {
+          100: "hsl(var(--surface-100))",
+          200: "hsl(var(--surface-200))",
+        },
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-accent': 'var(--gradient-accent)',
         'gradient-subtle': 'var(--gradient-subtle)',
+        'gradient-cyber': 'var(--gradient-cyber)',
+        'gradient-hero': 'var(--gradient-hero)',
+        'gradient-card': 'var(--gradient-card)',
       },
       boxShadow: {
         'subtle': 'var(--shadow-subtle)',
         'medium': 'var(--shadow-medium)',
         'strong': 'var(--shadow-strong)',
         'glow': 'var(--shadow-glow)',
+        'cyber': 'var(--shadow-cyber)',
       },
       transitionProperty: {
         'smooth': 'var(--transition-smooth)',
@@ -149,10 +166,10 @@ export default {
         },
         "glow": {
           "0%, 100%": {
-            boxShadow: "0 0 20px hsl(var(--accent-100) / 0.3)"
+            boxShadow: "0 0 20px hsl(var(--cyber-blue) / 0.3)"
           },
           "50%": {
-            boxShadow: "0 0 40px hsl(var(--accent-100) / 0.6)"
+            boxShadow: "0 0 40px hsl(var(--cyber-blue) / 0.6), 0 0 60px hsl(var(--cyber-blue) / 0.4)"
           }
         },
         "bounce-soft": {

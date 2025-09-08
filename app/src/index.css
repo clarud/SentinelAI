@@ -8,30 +8,36 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* SentinelAI Design System */
-    --primary-100: 200 81% 90%;      /* #d4eaf7 */
-    --primary-200: 200 33% 78%;      /* #b6ccd8 */
-    --primary-300: 180 3% 23%;       /* #3b3c3d */
-    --accent-100: 200 82% 69%;       /* #71c4ef */
-    --accent-200: 200 100% 27%;      /* #00668c */
-    --text-100: 0 3% 11%;            /* #1d1c1c */
-    --text-200: 200 17% 24%;         /* #313d44 */
-    --bg-100: 60 50% 99%;            /* #fffefb */
-    --bg-200: 50 23% 96%;            /* #f5f4f1 */
-    --bg-300: 50 5% 79%;             /* #cccbc8 */
+    /* SentinelAI Enhanced Design System */
+    --primary-100: 195 100% 94%;     /* #e8f4ff */
+    --primary-200: 200 88% 84%;      /* #b3dbf0 */
+    --primary-300: 210 100% 12%;     /* #001e3d */
+    --accent-100: 195 100% 72%;      /* #52c8ff */
+    --accent-200: 210 100% 35%;      /* #0066b3 */
+    --accent-300: 225 100% 25%;      /* #004080 */
+    --cyber-blue: 195 100% 60%;      /* #0099ff */
+    --cyber-purple: 270 100% 70%;    /* #8a2be2 */
+    --cyber-teal: 180 100% 40%;      /* #00cccc */
+    --text-100: 210 25% 8%;          /* #0f1419 */
+    --text-200: 210 15% 25%;         /* #36404a */
+    --bg-100: 220 25% 97%;           /* #f8f9fb */
+    --bg-200: 215 25% 92%;           /* #e8edf2 */
+    --bg-300: 210 15% 85%;           /* #d1d8df */
+    --surface-100: 220 50% 98%;      /* #f9fafb */
+    --surface-200: 215 40% 94%;      /* #eef2f5 */
 
     /* Semantic tokens based on SentinelAI colors */
-    --background: var(--bg-100);
+    --background: linear-gradient(135deg, hsl(var(--surface-100)), hsl(var(--bg-100)));
     --foreground: var(--text-100);
     
-    --card: var(--bg-100);
+    --card: hsl(var(--surface-100) / 0.95);
     --card-foreground: var(--text-100);
     
-    --popover: var(--bg-100);
+    --popover: hsl(var(--surface-100) / 0.98);
     --popover-foreground: var(--text-100);
     
     --primary: var(--accent-200);
-    --primary-foreground: var(--bg-100);
+    --primary-foreground: var(--surface-100);
     
     --secondary: var(--primary-100);
     --secondary-foreground: var(--text-200);
@@ -39,28 +45,32 @@ All colors MUST be HSL.
     --muted: var(--bg-200);
     --muted-foreground: var(--text-200);
     
-    --accent: var(--accent-100);
-    --accent-foreground: var(--text-100);
+    --accent: var(--cyber-blue);
+    --accent-foreground: var(--surface-100);
     
-    --destructive: 0 72% 51%;
-    --destructive-foreground: var(--bg-100);
+    --destructive: 0 84% 60%;
+    --destructive-foreground: var(--surface-100);
     
-    --border: var(--bg-300);
-    --input: var(--bg-200);
-    --ring: var(--accent-200);
+    --border: hsl(var(--bg-100) / 0.8);
+    --input: hsl(var(--surface-200) / 0.8);
+    --ring: var(--cyber-blue);
     
     --radius: 0.75rem;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-100)), hsl(var(--accent-100)));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent-100)), hsl(var(--accent-200)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--bg-100)), hsl(var(--bg-200)));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-100)), hsl(var(--cyber-blue) / 0.8));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--cyber-blue)), hsl(var(--accent-300)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--surface-100)), hsl(var(--bg-200)));
+    --gradient-cyber: linear-gradient(135deg, hsl(var(--cyber-blue) / 0.1), hsl(var(--cyber-teal) / 0.1));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-300) / 0.05), hsl(var(--cyber-blue) / 0.1), hsl(var(--surface-100)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--surface-100) / 0.9), hsl(var(--bg-100) / 0.8));
     
     /* Shadows */
-    --shadow-subtle: 0 2px 8px -2px hsl(var(--primary-300) / 0.1);
-    --shadow-medium: 0 8px 16px -4px hsl(var(--primary-300) / 0.15);
-    --shadow-strong: 0 16px 32px -8px hsl(var(--primary-300) / 0.2);
-    --shadow-glow: 0 0 32px hsl(var(--accent-100) / 0.3);
+    --shadow-subtle: 0 2px 8px -2px hsl(var(--primary-300) / 0.08), 0 1px 3px hsl(var(--cyber-blue) / 0.1);
+    --shadow-medium: 0 8px 25px -5px hsl(var(--primary-300) / 0.15), 0 4px 12px hsl(var(--cyber-blue) / 0.1);
+    --shadow-strong: 0 25px 50px -12px hsl(var(--primary-300) / 0.25), 0 12px 25px hsl(var(--cyber-blue) / 0.15);
+    --shadow-glow: 0 0 40px hsl(var(--cyber-blue) / 0.4), 0 0 80px hsl(var(--cyber-blue) / 0.2);
+    --shadow-cyber: 0 8px 32px hsl(var(--cyber-blue) / 0.3), 0 0 0 1px hsl(var(--cyber-blue) / 0.1);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -69,29 +79,34 @@ All colors MUST be HSL.
 
   .dark {
     --background: var(--primary-300);
-    --foreground: var(--bg-100);
+    --foreground: var(--surface-100);
     
-    --card: var(--primary-300);
-    --card-foreground: var(--bg-100);
+    --card: hsl(var(--primary-300) / 0.95);
+    --card-foreground: var(--surface-100);
     
-    --popover: var(--primary-300);
-    --popover-foreground: var(--bg-100);
+    --popover: hsl(var(--primary-300) / 0.98);
+    --popover-foreground: var(--surface-100);
     
-    --primary: var(--accent-100);
+    --primary: var(--cyber-blue);
     --primary-foreground: var(--primary-300);
     
     --secondary: var(--text-200);
-    --secondary-foreground: var(--bg-100);
+    --secondary-foreground: var(--surface-100);
     
-    --muted: var(--text-200);
-    --muted-foreground: var(--bg-300);
+    --muted: hsl(var(--text-200) / 0.8);
+    --muted-foreground: var(--bg-200);
     
-    --accent: var(--accent-100);
+    --accent: var(--cyber-blue);
     --accent-foreground: var(--primary-300);
     
-    --border: var(--text-200);
-    --input: var(--text-200);
-    --ring: var(--accent-100);
+    --border: hsl(var(--surface-100) / 0.2);
+    --input: hsl(var(--text-200) / 0.8);
+    --ring: var(--cyber-blue);
+    
+    /* Dark mode gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-300)), hsl(var(--text-200) / 0.8), hsl(var(--primary-300) / 0.9));
+    --gradient-card: linear-gradient(145deg, hsl(var(--primary-300) / 0.9), hsl(var(--text-200) / 0.7));
+    --gradient-cyber: linear-gradient(135deg, hsl(var(--cyber-blue) / 0.2), hsl(var(--cyber-teal) / 0.1));
   }
 }
 
@@ -101,6 +116,42 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--gradient-hero);
+    background-attachment: fixed;
+  }
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--bg-200) / 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--cyber-blue) / 0.3);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--cyber-blue) / 0.5);
+  }
+
+  /* Enhanced glass morphism effects */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .cyber-glow {
+    box-shadow: 
+      0 0 20px hsl(var(--cyber-blue) / 0.3),
+      0 0 40px hsl(var(--cyber-blue) / 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 }
