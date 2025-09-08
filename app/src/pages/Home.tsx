@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { EmailSidebar } from '@/components/email-sidebar';
 import { ReportDisplay } from '@/components/report-display';
 import { ChatBot } from '@/components/chat-bot';
+import { Button } from '@/components/ui/button';
 import { ScamReport } from '@/lib/api';
-import { Shield } from 'lucide-react';
-import sentinelLogo from '@/assets/SentinelAI_logo.png';
+import { Shield, LogOut } from 'lucide-react';
+import sentinelLogo from '@/assets/SentinelAILogo.png';
 
 export default function Home() {
   const { user_email } = useParams();
+  const navigate = useNavigate();
   const [selectedEmailId, setSelectedEmailId] = useState<string>();
   const [currentReport, setCurrentReport] = useState<ScamReport | null>(null);
 
@@ -19,20 +21,46 @@ export default function Home() {
     }
   }, [user_email]);
 
+  const handleLogout = () => {
+    // Clear session storage
+    sessionStorage.removeItem('user_email');
+    // Redirect to login page (assuming root path is login)
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
-        <div className="flex items-center gap-3 p-4">
-          <img 
-            src={sentinelLogo} 
-            alt="SentinelAI" 
-            className="w-8 h-8 transition-transform hover:scale-110"
-          />
-          <h1 className="text-xl font-bold bg-gradient-accent bg-clip-text text-transparent animate-slide-in-right">
-            SentinelAI
-          </h1>
-          <Shield className="h-5 w-5 text-accent-200 ml-1 animate-glow" />
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <img 
+              src={sentinelLogo} 
+              alt="SentinelAI" 
+              className="w-8 h-8 transition-transform hover:scale-110"
+            />
+            <h1 className="text-xl font-bold bg-gradient-accent bg-clip-text text-transparent animate-slide-in-right">
+              SentinelAI
+            </h1>
+            <Shield className="h-5 w-5 text-accent-200 ml-1 animate-glow" />
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {user_email && (
+              <span className="text-sm text-muted-foreground">
+                {user_email}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="transition-all duration-200 hover:scale-105 hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Log out
+            </Button>
+          </div>
         </div>
       </header>
 
