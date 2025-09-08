@@ -23,14 +23,38 @@ export function ChatBot({ report }: ChatBotProps) {
   const [currentInput, setCurrentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Scroll to bottom whenever messages change
   useEffect(() => {
-    // Scroll to bottom when new messages are added or input is cleared
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+    scrollToBottom();
+  }, [messages]);
+
+  // Scroll to bottom when loading state changes (for the "Thinking..." message)
+  useEffect(() => {
+    if (isLoading) {
+      scrollToBottom();
     }
-  }, [messages, currentInput]);
+  }, [isLoading]);
+
+  const scrollToBottom = () => {
+    // Use requestAnimationFrame to ensure the scroll happens after DOM updates
+    requestAnimationFrame(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      } else if (scrollAreaRef.current) {
+        // Fallback to scrollArea if messagesEndRef isn't available
+        scrollAreaRef.current.scrollTo({ 
+          top: scrollAreaRef.current.scrollHeight, 
+          behavior: 'smooth' 
+        });
+      }
+    });
+  };
 
   const handleSendMessage = async () => {
     if (!currentInput.trim()) return;
@@ -148,6 +172,9 @@ export function ChatBot({ report }: ChatBotProps) {
                 </div>
               </div>
             )}
+            
+            {/* Invisible element at the bottom to scroll to */}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 

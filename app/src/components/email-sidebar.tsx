@@ -45,7 +45,8 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
       }
       const emailList = await response.json();
       console.log("Fetched emails:", emailList);
-      setEmails(emailList);
+      // Reverse the order to show newest first
+      setEmails(emailList.reverse());
     } catch (error) {
       console.error("Failed to fetch emails:", error);
     } finally {
@@ -61,10 +62,10 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
   };
 
   return (
-    <Card className="h-full p-4 border-r border-border">
-      <div className="space-y-4">
+    <Card className="h-full p-4 border-r border-border flex flex-col">
+      <div className="flex flex-col h-full space-y-4">
         {/* Toggle Switch */}
-        <div className="pb-4 border-b border-border animate-fade-in">
+        <div className="pb-4 border-b border-border animate-fade-in flex-shrink-0">
           <div className="transition-transform hover:scale-105">
             <ToggleSwitch
               label="Toggle email listen"
@@ -83,8 +84,8 @@ export function EmailSidebar({ onEmailSelect, selectedEmailId }: EmailSidebarPro
           )}
         </div>
 
-        {/* Email List */}
-        <div className="space-y-2">
+        {/* Email List - Scrollable */}
+        <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
           {isLoading && (
             <div className="flex items-center justify-center py-8 animate-fade-in">
               <LoadingSpinner />

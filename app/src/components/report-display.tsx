@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { FileUpload } from '@/components/ui/file-upload';
 import { Shield, AlertTriangle, CheckCircle, Info, Calendar, User, Mail, Download } from 'lucide-react';
-import { ScamReport, apiClient } from '@/lib/api';
+import { ScamReport, apiClient, TaskResult } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -28,13 +28,27 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
     setIsLoading(true);
     
     try {
-      const result = await apiClient.uploadFile(file);
-      setReport(result);
-      onReportChange(result);
-      toast({
-        title: "File processed successfully",
-        description: `${file.name} has been analyzed for threats.`,
-      });
+      // First, upload the file and get task ID
+      const uploadResult = await apiClient.uploadFile(file);
+      const taskId = uploadResult.task_id;
+      
+      if (!taskId) {
+        throw new Error("No task ID received from upload");
+      }
+      
+      // Poll for task completion
+      const result = await pollTaskResult(taskId);
+      
+      if (result.state === "SUCCESS" && result.result?.assessment) {
+        setReport(result.result.assessment);
+        onReportChange(result.result.assessment);
+        toast({
+          title: "File processed successfully",
+          description: `${file.name} has been analyzed for threats.`,
+        });
+      } else {
+        throw new Error("Task failed or assessment not available");
+      }
     } catch (error) {
       console.error('File upload failed:', error);
       toast({
@@ -45,6 +59,36 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const pollTaskResult = async (taskId: string): Promise<TaskResult> => {
+    const maxAttempts = 30; // 5 minutes max (30 * 10 seconds)
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(`https://sentinelai-services.onrender.com/api/jobs/tasks/${taskId}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch task status: ${response.statusText}`);
+        }
+        
+        const taskResult: TaskResult = await response.json();
+        
+        if (taskResult.state === "SUCCESS" || taskResult.state === "FAILURE") {
+          return taskResult;
+        }
+        
+        // Task is still pending, wait and retry
+        await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+        attempts++;
+        
+      } catch (error) {
+        console.error('Error polling task result:', error);
+        throw error;
+      }
+    }
+    
+    throw new Error("Task polling timeout - took too long to complete");
   };
 
   const fetchEmailReport = async (emailId: string) => {
@@ -67,20 +111,22 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
 
   const handleDownload = async () => {
     if (!selectedEmailId) return;
-    
+
     setIsDownloading(true);
     try {
-      const driveLink = await apiClient.downloadReport(selectedEmailId);
-      window.open(driveLink, '_blank');
+      if (!report?.drive_analysis_link) {
+        throw new Error("Drive analysis link is not available.");
+      }
+      window.open(report.drive_analysis_link, '_blank');
       toast({
         title: "Download started",
-        description: "Report is being downloaded from Google Drive.",
+        description: "Redirecting to the Google Drive file.",
       });
     } catch (error) {
       console.error('Download failed:', error);
       toast({
         title: "Download failed",
-        description: "Failed to download the report. Please try again.",
+        description: error.message || "Failed to download the report. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -205,7 +251,12 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
           <div className="flex items-center justify-center py-12 animate-fade-in">
             <div className="text-center">
               <LoadingSpinner size="lg" />
-              <p className="mt-4 text-muted-foreground animate-pulse-soft">Analyzing content...</p>
+              <p className="mt-4 text-muted-foreground animate-pulse-soft">
+                {uploadedFile ? 'Processing file and analyzing content...' : 'Analyzing content...'}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                This may take a few minutes
+              </p>
             </div>
           </div>
         )}

@@ -23,6 +23,19 @@ export interface ScamReport {
   tool_evidence?: Array<Record<string, any>>;
   tool_errors?: Array<Record<string, any>>;
   processing_metadata: Record<string, any>;
+  drive_analysis_link?: string; // Added field for Google Drive link of analysis report
+}
+
+export interface UploadResponse {
+  task_id: string;
+}
+
+export interface TaskResult {
+  state: "PENDING" | "SUCCESS" | "FAILURE";
+  result?: {
+    text?: string;
+    assessment?: ScamReport;
+  };
 }
 
 export interface ChatMessage {
@@ -53,7 +66,7 @@ export class ApiClient {
     window.location.href = `${this.baseUrl}/api/connect-gmail`;
   }
 
-  async uploadFile(file: File): Promise<ScamReport> {
+  async uploadFile(file: File): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
