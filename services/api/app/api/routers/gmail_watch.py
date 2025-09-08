@@ -264,7 +264,6 @@ async def handle_notification(request: email.NotificationRequest):
                         )
 
                         task = celery.send_task("email_triage_with_email", args=[email_data.model_dump()])
-                        store_email(email_address, email_data)
 
                     except Exception as email_error:
                         print(f"⚠️ Error processing message {msg_id}: {email_error}")

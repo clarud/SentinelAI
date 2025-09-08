@@ -5,7 +5,7 @@ def _env(key: str, default: str) -> str:
 
 # Centralized MCP server configuration
 CENTRALIZED_MCP_SERVER = {
-    "url": _env("MCP_CENTRALIZED_URL", "ws://localhost:7030/ws"),
+    "url": _env("MCP_CENTRALIZED_URL", "wss://sentinelai-w913.onrender.com/ws"),
     "timeout": float(_env("MCP_CENTRALIZED_TIMEOUT_S", "5.0")),
 }
 
