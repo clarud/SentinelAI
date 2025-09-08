@@ -21,6 +21,9 @@ SentinelAI is a comprehensive, multi-service fraud detection platform that uses 
 - **� Modern UI/UX**: Responsive React interface with custom color scheme and smooth animations
 
 ## 🏗️ Architecture Overview
+<div align="center">
+  <img src="assets/architecture.png" alt="Architecture Diagram">
+</div>
 
 
 
@@ -167,6 +170,10 @@ SentinelAI/
 
 SentinelAI implements a sophisticated **multi-agent workflow** that dynamically adapts based on confidence levels:
 
+<div align="center">
+  <img src="assets/agentic.png" alt="Agentic Workflow">
+</div>
+
 ### Agent Types
 
 1. **🔄 ROUTER Agent** - Intelligent workflow orchestrator
@@ -292,6 +299,7 @@ Document → Processing → RAG → ROUTER → PLANNER → ANALYST → SUPERVISO
   - Text: `#1d1c1c` (Primary), `#313d44` (Secondary)
   - Background: `#fffefb` (Primary), `#f5f4f1` (Secondary), `#cccbc8` (Tertiary)
 - **Smooth Animations**: Loading states, transitions, and micro-interactions
+- **Light and Dark Mode**: Improves visibility in different environments.
 
 ### ⚡ Real-time Updates
 - **Live Email Feed**: Automatic polling for new emails
