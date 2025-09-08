@@ -60,14 +60,16 @@ export function ChatBot({ currentReport }: ChatBotProps) {
       content: currentInput.trim()
     };
 
-    setMessages(prevMessages => [...prevMessages, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setCurrentInput('');
     setIsLoading(true);
 
     try {
       const context = currentReport ? JSON.stringify(currentReport) : '';
       
-      const response = await apiClient.sendChatMessage(userMessage.content, context);
+      // Pass the current conversation history to the API
+      const response = await apiClient.sendChatMessage(userMessage.content, context, updatedMessages);
       
       // Add the assistant's response
       const latestResponse = response.history[response.history.length - 1];

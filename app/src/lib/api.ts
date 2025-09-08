@@ -98,6 +98,16 @@ export class ApiClient {
     return response.json();
   }
 
+  async sendChatMessage(message: string, context: string = '', history: ChatMessage[] = []): Promise<ChatResponse> {
+    const request: ChatRequest = {
+      current_input: message,
+      context: context,
+      history: history
+    };
+
+    return this.chat(request);
+  }
+
   async getTaskStatus(taskId: string): Promise<any> {
     const response = await fetch(`${this.baseUrl}/api/jobs/tasks/${taskId}`, {
       method: 'GET',

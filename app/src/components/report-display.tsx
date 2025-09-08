@@ -249,7 +249,7 @@ export function ReportDisplay({ selectedEmailId, onReportChange }: ReportDisplay
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-12 animate-fade-in">
-            <div className="text-center">
+            <div className="text-center flex flex-col items-center">
               <LoadingSpinner size="lg" />
               <p className="mt-4 text-muted-foreground animate-pulse-soft">
                 {uploadedFile ? 'Processing file and analyzing content...' : 'Analyzing content...'}
