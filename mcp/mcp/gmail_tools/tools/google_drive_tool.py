@@ -237,6 +237,18 @@ def build_scam_report_pdf(
     Convert the given result dict and user_email into a styled PDF (BytesIO).
     Returns: io.BytesIO positioned at start.
     """
+    from email.utils import parsedate_to_datetime
+
+    def _fmt_date(s: Optional[str]) -> str:
+        if not s:
+            return "—"
+        try:
+            dt = parsedate_to_datetime(s)
+            # normalize naive/UTC-ish displays
+            return dt.strftime("%Y-%m-%d %H:%M:%S %Z") if dt.tzinfo else dt.strftime("%Y-%m-%d %H:%M:%S")
+        except Exception:
+            return s
+
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -295,14 +307,58 @@ def build_scam_report_pdf(
 
     # Status badge
     is_scam = str(result.get("is_scam", "unknown")).lower()
-    if "scam" in is_scam:
+    if "scam" in is_scam and "not" not in is_scam:
         badge = Badge("Likely Scam", bg=colors.HexColor("#ef4444"))
     elif "not" in is_scam or "safe" in is_scam:
         badge = Badge("Unlikely Scam", bg=colors.HexColor("#10b981"))
+    elif "suspicious" in is_scam:
+        badge = Badge("Suspicious", bg=colors.HexColor("#f59e0b"))
     else:
-        badge = Badge("Unknown", bg=colors.HexColor("#f59e0b"))
+        badge = Badge("Unknown", bg=colors.HexColor("#9ca3af"))
     story.append(badge)
     story.append(Spacer(1, 6))
+
+    # --------- Email Overview (NEW) ---------
+    email = (result or {}).get("email") or {}
+    if email:
+        story.append(Paragraph("Email Overview", h2))
+        # Top line: subject emphasized if present
+        subject = email.get("subject") or "—"
+        story.append(Paragraph(f"<b>Subject:</b> {subject}", body))
+        # Key value table for common headers
+        email_rows = {
+            "From": email.get("sender") or "—",
+            "To": email.get("to") or "—",
+            "Date": _fmt_date(email.get("date")),
+            "Message ID": email.get("id") or "—",
+            "Thread ID": email.get("threadId") or "—",
+            "Account": email.get("email_address") or "—",
+        }
+        story.append(_kv_table(email_rows, col1="Header", col2="Value"))
+        # Snippet preview if present
+        snippet = (email.get("snippet") or "").strip()
+        if snippet:
+            story.append(Spacer(1, 3))
+            story.append(Paragraph("<b>Snippet</b>", small))
+            story.append(_mono_box(snippet))
+
+
+        # Original Body / Preview block
+        body_preview = (email.get("body_preview") or "").strip()
+        full_body = (email.get("body") or "").strip()
+        if body_preview or full_body:
+            story.append(Spacer(1, 6))
+            story.append(Paragraph("Original Email Body", h2))
+            # Prefer preview (usually cleaned/plain-text); fall back to full body
+            content = body_preview or full_body
+            # Keep very large bodies manageable: soft truncate but still allow the rest in a second box
+            MAX_CHARS = 8000  # PDF-friendly limit to avoid giant flows
+            if len(content) <= MAX_CHARS:
+                story.append(_mono_box(content))
+            else:
+                story.append(_mono_box(content[:MAX_CHARS] + "\n\n[... truncated ...]"))
+                # Optionally include a lighter second box for the remainder
+                # story.append(_mono_box(content[MAX_CHARS:]))
 
     # --------- Quick metrics ---------
     explanation = result.get("explanation", "") or ""
@@ -376,6 +432,7 @@ def build_scam_report_pdf(
             else:
                 story.append(_mono_box(str(output)))
 
+
     # --------- Processing Metadata ---------
     pm = result.get("processing_metadata", {}) or {}
     story.append(Spacer(1, 8))
@@ -417,6 +474,7 @@ def build_scam_report_pdf(
     doc.build(story, onFirstPage=_on_page, onLaterPages=_on_page)
     buffer.seek(0)
     return buffer
+
 
 def upload_to_google_drive(user_email: str, pdf_buffer: io.BytesIO, filename: str) -> str:
     """
