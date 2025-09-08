@@ -31,7 +31,7 @@ def _chat_json(system: str, user_obj: Dict[str, Any]) -> Dict[str, Any]:
         
         client = boto3.client("bedrock-runtime", region_name="us-east-1")
         response = client.converse(
-            modelId="anthropic.claude-3-sonnet-20240229-v1:0",
+            modelId="amazon.nova-micro-v1:0",
             messages=[
                 {"role": "user", "content": [{"text": json.dumps(user_obj)}]}
             ],

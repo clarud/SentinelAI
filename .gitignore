@@ -82,3 +82,4 @@ services/test/worker/*.json
 ocr_extraction.py
 debug_mcp.py
 test_mcp_connection.py
+mcp-env/
